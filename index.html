@@ -1,0 +1,2710 @@
+<!DOCTYPE html>
+<html lang="en" data-property="sandhill">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Atelier · A Rosewood Experience</title>
+<!-- Inline favicon (a small gold ring) — silences the 404 -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%23a08654' stroke-width='3'/%3E%3C/svg%3E" type="image/svg+xml" />
+
+<link rel="stylesheet" href="atelier-tokens.css" />
+
+<style>
+  /* ────────────── PAGE SHELL ────────────── */
+  html, body { overflow: hidden; }
+  body { min-height: 100vh; }
+
+  /* the property's atmospheric backdrop, full-bleed, always present, very quiet */
+  .atmosphere {
+    position: fixed; inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity var(--t-slow) var(--ease);
+  }
+  .atmosphere::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--hero-sky);
+    opacity: 0.08;  /* very quiet in-studio */
+    transition: opacity var(--t-slow) var(--ease), background var(--t-slow) var(--ease);
+  }
+  body.cover-active .atmosphere::before { opacity: 0.85; }
+  body.cover-active .atmosphere {
+    filter: saturate(1.05);
+  }
+
+  /* film grain to give photographic atmosphere */
+  .atmosphere::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.04;
+    mix-blend-mode: overlay;
+  }
+
+  /* ════════════════════════════════════════════
+                       COVER
+  ════════════════════════════════════════════ */
+  .cover {
+    position: fixed; inset: 0;
+    z-index: 200;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: 5vh 6vw;
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    background: var(--hero-sky);
+    overflow: hidden;
+  }
+  .cover::before {
+    /* film grain on top of the sky */
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.06;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  body.studio-active .cover {
+    opacity: 0;
+    transform: scale(0.985);
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), visibility 0s linear 0.7s;
+  }
+
+  .cover-veil {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.10) 45%, rgba(0,0,0,0.32) 100%);
+    pointer-events: none;
+  }
+
+  .cover-top, .cover-bottom, .cover-mid {
+    position: relative; z-index: 2;
+  }
+  .cover-top {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: flex-start;
+    color: #f7eed8;
+  }
+  .cover-wordmark {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.45em;
+    color: rgba(247, 238, 216, 0.85);
+  }
+  .cover-meta {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 238, 216, 0.6);
+    text-align: right;
+    line-height: 1.6;
+    white-space: nowrap;
+    justify-self: end;
+  }
+
+  /* "Why the Atelier" trigger — quietly centered above the headline */
+  .cover-about-btn {
+    justify-self: center;
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 238, 216, 0.78);
+    padding: 11px 20px 11px 14px;
+    border: 1px solid rgba(250, 242, 221, 0.30);
+    background: rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  }
+  .cover-about-btn:hover {
+    color: #faf2dd;
+    border-color: rgba(250, 242, 221, 0.78);
+    background: rgba(250, 242, 221, 0.10);
+  }
+  .cover-about-btn .cover-about-ico {
+    width: 18px; height: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12px;
+    line-height: 1;
+    letter-spacing: 0;
+    padding-bottom: 1px;
+  }
+  .cover-about-btn em {
+    font-family: var(--serif);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    font-size: 13.5px;
+    color: rgba(247, 238, 216, 0.95);
+  }
+
+  /* ════════════════════════════════════════════
+              ABOUT — the "why" presentation
+  ════════════════════════════════════════════ */
+  .about {
+    position: fixed; inset: 0;
+    z-index: 400;
+    background: var(--hero-sky);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.6s var(--ease), visibility 0s linear 0.6s;
+    overflow: hidden;
+    color: #faf2dd;
+  }
+  body.about-open .about {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.6s var(--ease), visibility 0s linear 0s;
+  }
+  /* grain over the sky */
+  .about::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+  /* gentle veil for legibility */
+  .about::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.0) 0%, rgba(0,0,0,0.08) 35%, rgba(0,0,0,0.40) 100%);
+    pointer-events: none;
+  }
+
+  .about-head {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 4vh 6vw 0;
+  }
+  .about-brand {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.45em;
+    color: rgba(247, 238, 216, 0.78);
+  }
+  .about-brand em {
+    font-family: var(--serif);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.04em;
+    font-size: 14px;
+    color: rgba(247, 238, 216, 0.95);
+    margin-left: 12px;
+  }
+  .about-close {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 238, 216, 0.75);
+    padding: 10px 18px;
+    border: 1px solid rgba(250, 242, 221, 0.32);
+    background: rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(6px);
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .about-close:hover {
+    color: #faf2dd;
+    border-color: rgba(250, 242, 221, 0.85);
+    background: rgba(250, 242, 221, 0.10);
+  }
+
+  .about-stage {
+    position: relative; z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: 3vh 6vw;
+    overflow: hidden;
+  }
+  .about-slide {
+    display: none;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    align-items: center;
+    gap: 6vw;
+    max-width: 1240px;
+    width: 100%;
+  }
+  .about-slide.is-active {
+    display: grid;
+    animation: about-in 0.7s var(--ease) forwards;
+  }
+  @keyframes about-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .about-visual {
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(247, 238, 216, 0.85);
+    min-height: 320px;
+  }
+  .about-visual svg {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    overflow: visible;
+  }
+
+  .about-copy { max-width: 580px; }
+  .about-copy .eb {
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(247, 238, 216, 0.65);
+    margin-bottom: 22px;
+  }
+  .about-copy h2 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(40px, 5.4vw, 76px);
+    line-height: 1.0;
+    letter-spacing: -0.012em;
+    color: #faf2dd;
+    text-shadow: 0 2px 30px rgba(0,0,0,0.35);
+    margin-bottom: 26px;
+  }
+  .about-copy h2 em { font-style: italic; font-weight: 300; }
+  .about-copy p {
+    font-family: var(--serif);
+    font-size: 20px;
+    font-weight: 300;
+    line-height: 1.55;
+    color: rgba(250, 242, 221, 0.92);
+    text-wrap: pretty;
+  }
+  .about-copy p + p { margin-top: 14px; }
+  .about-copy p em { font-style: italic; }
+  .about-copy ul {
+    list-style: none;
+    margin-top: 22px;
+    display: grid;
+    gap: 12px;
+  }
+  .about-copy ul li {
+    font-family: var(--serif);
+    font-size: 17.5px;
+    font-weight: 300;
+    line-height: 1.45;
+    color: rgba(250, 242, 221, 0.90);
+    padding-left: 24px;
+    position: relative;
+  }
+  .about-copy ul li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0.78em;
+    width: 14px; height: 1px;
+    background: rgba(250, 242, 221, 0.55);
+  }
+  .about-copy ul li em { font-style: italic; }
+
+  /* slide 4 — closing wordmark · single centered stack, no side visual */
+  .about-slide.is-finale {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: 0;
+  }
+  .about-slide.is-finale.is-active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .about-slide.is-finale .about-copy {
+    max-width: 760px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+  }
+  .about-slide.is-finale .about-copy h2 {
+    font-size: clamp(48px, 6.4vw, 96px);
+    margin: 0;
+  }
+  .about-slide.is-finale .about-copy p {
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .about-slide.is-finale .about-rule {
+    width: 80px; height: 1px;
+    background: rgba(250, 242, 221, 0.55);
+    margin: 0;
+  }
+  .about-slide.is-finale .about-finale-mark {
+    display: inline-flex;
+    align-items: center;
+    gap: 18px;
+    color: rgba(247, 238, 216, 0.80);
+    margin-bottom: 4px;
+  }
+  .about-slide.is-finale .about-finale-mark .rw {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: 0.5em;
+  }
+  .about-slide.is-finale .about-finale-mark .dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.75;
+  }
+  .about-slide.is-finale .about-finale-mark em {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: rgba(247, 238, 216, 0.95);
+    letter-spacing: 0.04em;
+  }
+  .about-slide.is-finale .about-finale-tag {
+    font-size: 17px;
+    color: rgba(250, 242, 221, 0.78);
+  }
+
+  .about-foot {
+    position: relative; z-index: 2;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 0 6vw 4vh;
+    gap: 24px;
+  }
+  .about-progress {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 238, 216, 0.55);
+  }
+  .about-progress em {
+    font-family: var(--serif);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.04em;
+    color: rgba(247, 238, 216, 0.92);
+    font-size: 13px;
+    margin: 0 4px;
+  }
+  .about-dots {
+    display: flex; gap: 12px; justify-self: center;
+  }
+  .about-dot {
+    width: 32px; height: 1px;
+    background: rgba(250, 242, 221, 0.25);
+    cursor: pointer;
+    transition: background var(--t-fast) var(--ease), height var(--t-fast) var(--ease);
+    padding: 0; border: none;
+  }
+  .about-dot:hover { background: rgba(250, 242, 221, 0.55); }
+  .about-dot.is-active {
+    background: rgba(250, 242, 221, 0.95);
+    height: 2px;
+  }
+  .about-nav {
+    display: flex; gap: 10px; justify-self: end;
+  }
+  .about-nav button {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(247, 238, 216, 0.78);
+    padding: 11px 20px;
+    border: 1px solid rgba(250, 242, 221, 0.30);
+    background: rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .about-nav button:hover:not(:disabled) {
+    color: #faf2dd;
+    border-color: rgba(250, 242, 221, 0.85);
+    background: rgba(250, 242, 221, 0.10);
+  }
+  .about-nav button:disabled {
+    opacity: 0.30;
+    cursor: default;
+  }
+  .about-nav .is-primary {
+    color: #faf2dd;
+    border-color: rgba(250, 242, 221, 0.7);
+  }
+
+  @media (max-width: 900px) {
+    .about-slide { grid-template-columns: 1fr; gap: 32px; }
+    .about-visual { min-height: 220px; }
+    .about-visual svg { max-width: 260px; }
+    .about-copy { max-width: 100%; }
+    .about-foot { grid-template-columns: 1fr; gap: 16px; }
+    .about-progress, .about-dots, .about-nav { justify-self: center; }
+    .cover-about-btn em { display: none; }
+  }
+  .cover-meta em { font-style: italic; text-transform: none; letter-spacing: 0.04em; font-family: var(--serif); color: rgba(247,238,216,0.92); font-size: 14px; display: block; margin-top: 2px; }
+
+  .cover-mid {
+    display: grid;
+    grid-template-columns: minmax(0,1fr);
+    align-content: center;
+    justify-items: center;
+    color: #faf2dd;
+    text-align: center;
+    gap: 22px;
+  }
+  .cover-title {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(64px, 9vw, 132px);
+    line-height: 0.96;
+    letter-spacing: -0.012em;
+    color: #faf2dd;
+    text-shadow: 0 2px 40px rgba(0,0,0,0.4);
+  }
+  .cover-title em { font-style: italic; font-weight: 300; }
+  .cover-essay {
+    max-width: 520px;
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.55;
+    color: rgba(250, 242, 221, 0.88);
+    text-wrap: pretty;
+  }
+  .cover-rule {
+    width: 80px; height: 1px;
+    background: rgba(250, 242, 221, 0.45);
+    margin: 4px auto;
+  }
+  .cover-enter {
+    display: inline-flex; align-items: center; gap: 14px;
+    margin-top: 16px;
+    padding: 16px 28px 16px 22px;
+    font-family: var(--sans);
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: #faf2dd;
+    border: 1px solid rgba(250, 242, 221, 0.55);
+    background: rgba(0,0,0,0.0);
+    backdrop-filter: blur(4px);
+    transition: all var(--t-fast) var(--ease);
+    cursor: pointer;
+  }
+  .cover-enter:hover {
+    background: rgba(250, 242, 221, 0.12);
+    border-color: rgba(250, 242, 221, 0.9);
+  }
+  .cover-enter .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(250, 242, 221, 0.9);
+    box-shadow: 0 0 12px rgba(250, 242, 221, 0.6);
+    animation: orb-breath 3s ease-in-out infinite;
+  }
+  @keyframes orb-breath { 50% { transform: scale(1.25); opacity: 0.6; } }
+
+  .cover-bottom {
+    display: flex; justify-content: center; align-items: flex-end; gap: 32px;
+  }
+  .cover-properties {
+    display: flex; gap: 0;
+    background: rgba(0,0,0,0.18);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(250, 242, 221, 0.18);
+  }
+  .cover-property {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    padding: 14px 18px;
+    color: rgba(250, 242, 221, 0.55);
+    border-right: 1px solid rgba(250, 242, 221, 0.12);
+    cursor: pointer;
+    transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+    white-space: nowrap;
+  }
+  .cover-property:last-child { border-right: none; }
+  .cover-property:hover { color: rgba(250, 242, 221, 0.9); }
+  .cover-property.is-active {
+    color: #faf2dd;
+    background: rgba(250, 242, 221, 0.10);
+  }
+
+  /* ════════════════════════════════════════════
+                  STUDIO SHELL
+  ════════════════════════════════════════════ */
+  .studio {
+    position: fixed; inset: 0;
+    z-index: 10;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    pointer-events: auto;
+  }
+  body.cover-active .studio { pointer-events: none; }
+
+  /* TOP BAR — a single quiet line of chrome.
+     Stays at the viewport top across Studio · Your State · Constellation.
+     The bar lives inside the studio grid and overlays start *below* it. */
+  .top-bar {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--bg-veil);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 100;
+    transition: opacity var(--t-norm) var(--ease), background var(--t-norm) var(--ease), border-color var(--t-norm) var(--ease), color var(--t-norm) var(--ease);
+  }
+  body.in-dialogue .top-bar { opacity: 0.55; }
+  body.in-dialogue .top-bar:hover { opacity: 1; }
+
+  .bar-left { display: flex; align-items: baseline; gap: 14px; }
+  .bar-brand {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    white-space: nowrap;
+  }
+  .bar-brand em {
+    display: inline-block;
+    margin-left: 10px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    color: var(--ink-soft);
+  }
+
+  .bar-center {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--rule);
+    padding: 2px;
+  }
+  .bar-view {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+    white-space: nowrap;
+  }
+  .bar-view:hover { color: var(--ink); }
+  .bar-view.is-active {
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .bar-right { display: flex; align-items: center; gap: 18px; justify-content: flex-end; }
+  .bar-suite {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  .bar-suite .sn { font-style: normal; font-family: var(--sans); font-size: 10px; letter-spacing: 0.32em; text-transform: uppercase; color: var(--muted); display: block; }
+  .bar-mic {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 12px;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .bar-mic:hover { color: var(--ink); border-color: var(--ink); }
+  .bar-mic .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+  }
+  .bar-mic.is-live .dot {
+    background: var(--gold);
+    box-shadow: 0 0 8px var(--gold);
+    animation: orb-breath 2s ease-in-out infinite;
+  }
+  .bar-mic.is-live { color: var(--gold-deep); border-color: var(--gold-soft); }
+
+  /* ════════════════════════════════════════════
+              STUDIO CANVAS — the heart
+  ════════════════════════════════════════════ */
+  .canvas {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    overflow: hidden;
+  }
+
+  .stage {
+    position: relative;
+    overflow: auto;
+  }
+
+  /* ─── AT-REST CONSTELLATION ─── */
+  .at-rest {
+    position: relative;
+    min-height: 100%;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    align-items: center;
+    padding: 32px 48px 24px;
+    transition: opacity var(--t-slow) var(--ease), transform var(--t-slow) var(--ease);
+  }
+  body.in-dialogue .at-rest {
+    display: none;
+  }
+
+  .at-rest-orb-wrap {
+    display: grid; place-items: center;
+    gap: 22px;
+    align-self: center;
+    width: 100%;
+  }
+  .at-rest-eyebrow {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    display: inline-flex; gap: 10px; align-items: center;
+    white-space: nowrap;
+  }
+  .at-rest-eyebrow em {
+    font-family: var(--serif);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    color: var(--gold-deep);
+    font-size: 13px;
+  }
+  .at-rest-eyebrow .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold-glow);
+    animation: orb-breath 3s ease-in-out infinite;
+  }
+  .at-rest-prompt {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: var(--ink-soft);
+    text-align: center;
+    max-width: 540px;
+    line-height: 1.45;
+  }
+  .at-rest-prompt em { font-style: normal; color: var(--gold-deep); }
+
+  /* ─── Push-to-talk: the always-works backup affordance ─── */
+  .ptt-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px auto 2px;
+    padding: 12px 22px 12px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--gold-soft);
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 11.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease);
+    box-shadow: 0 1px 0 var(--gold-faint);
+  }
+  .ptt-button:hover {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px var(--gold-glow);
+  }
+  .ptt-button:hover svg { stroke: var(--bg); }
+  .ptt-button svg {
+    width: 16px; height: 16px;
+    stroke: var(--gold-deep);
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    transition: stroke var(--t-fast) var(--ease);
+  }
+  .ptt-button.is-live {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold-deep);
+    box-shadow: 0 0 0 4px var(--gold-glow);
+  }
+  .ptt-button.is-live svg { stroke: var(--bg); }
+  .ptt-button.is-live .ptt-label::after {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    margin-left: 8px;
+    border-radius: 50%;
+    background: var(--bg);
+    animation: orb-breath 1.4s ease-in-out infinite;
+  }
+
+  /* ─── The Atelier whisper — host reply, in-place on at-rest, no thread takeover ─── */
+  .atelier-whisper {
+    position: relative;
+    max-width: 600px;
+    width: calc(100% - 32px);
+    margin: 14px auto 4px;
+    padding: 22px 48px 22px 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--rule-soft);
+    border-left: 2px solid var(--gold-soft);
+    animation: whisper-in 0.5s var(--ease);
+  }
+  @keyframes whisper-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .atelier-whisper[hidden] { display: none !important; }
+  .atelier-whisper .aw-eb {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .atelier-whisper .aw-eb .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 0 6px var(--gold-glow);
+    animation: orb-breath 3s ease-in-out infinite;
+  }
+  .atelier-whisper .aw-body {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+  .atelier-whisper .aw-body em { font-style: italic; color: var(--ink-soft); }
+  .atelier-whisper .aw-body .cursor {
+    display: inline-block;
+    width: 0.5ch;
+    color: var(--gold);
+    animation: blink 1s steps(1) infinite;
+  }
+  .atelier-whisper .aw-close {
+    position: absolute;
+    top: 8px; right: 10px;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 18px;
+    line-height: 1;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    transition: color var(--t-fast) var(--ease);
+  }
+  .atelier-whisper .aw-close:hover { color: var(--ink); }
+
+  /* the specialist constellation row beneath the orb */
+  .suggestions {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 12px;
+    padding: 22px 8px 8px;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .suggestion {
+    display: grid;
+    grid-template-rows: auto auto auto;
+    justify-items: center;
+    gap: 10px;
+    padding: 18px 14px 16px;
+    text-align: center;
+    cursor: pointer;
+    background: transparent;
+    transition: background var(--t-fast) var(--ease);
+    border: 1px solid transparent;
+  }
+  .suggestion:hover {
+    background: var(--bg-card);
+    border-color: var(--rule-soft);
+  }
+  .suggestion .chip {
+    --chip: 44px;
+    width: var(--chip); height: var(--chip);
+    border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--orb-1) 0%, var(--orb-2) 50%, var(--orb-3) 90%, var(--orb-4) 100%);
+    position: relative;
+    display: grid; place-items: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+    color: var(--orb-1);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    box-shadow: 0 0 18px rgba(var(--orb-halo), 0.32);
+    transition: transform var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+  }
+  .suggestion:hover .chip {
+    transform: scale(1.08);
+    box-shadow: 0 0 28px rgba(var(--orb-halo), 0.5);
+  }
+  .suggestion .label {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--ink);
+    line-height: 1.25;
+    max-width: 130px;
+  }
+  .suggestion .who {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* see-all link */
+  .all-specialists {
+    display: flex; justify-content: center; padding: 14px;
+  }
+  .all-specialists button {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    transition: color var(--t-fast) var(--ease);
+  }
+  .all-specialists button:hover { color: var(--gold-deep); }
+  .all-specialists button::after {
+    content: ' →';
+    margin-left: 6px;
+    transition: margin var(--t-fast) var(--ease);
+  }
+  .all-specialists button:hover::after { margin-left: 10px; }
+
+  /* ─── IN-CONVERSATION PAGE ─── */
+  .dialogue {
+    position: absolute; inset: 0;
+    display: none;
+    grid-template-rows: auto 1fr auto;
+    padding: 22px 60px 0;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  body.in-dialogue .dialogue {
+    display: grid;
+  }
+  .dialogue.entering { animation: dialogue-in 0.6s var(--ease); }
+  @keyframes dialogue-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .dialogue-head {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .dialogue-head .head-orb {
+    --orb-size: 56px;
+    position: relative;
+  }
+  .head-title {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-style: italic;
+    color: var(--ink);
+  }
+  .head-title .who {
+    display: block;
+    font-family: var(--sans);
+    font-style: normal;
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 4px;
+  }
+  .head-actions { display: flex; gap: 12px; align-items: center; }
+  .lock-btn {
+    width: 40px; height: 40px;
+    border: 1px solid var(--rule);
+    display: grid; place-items: center;
+    transition: all var(--t-fast) var(--ease);
+    cursor: pointer;
+  }
+  .lock-btn:hover { border-color: var(--ink); }
+  .lock-btn.is-locked { background: var(--ink); border-color: var(--ink); }
+  .lock-btn.is-locked svg { stroke: var(--bg); }
+  .lock-btn svg { width: 16px; height: 16px; stroke: var(--ink-soft); fill: none; stroke-width: 1.5; }
+  .close-thread {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    background: none;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .close-thread:hover { color: var(--ink); border-color: var(--ink); }
+  .new-thread {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    background: none;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .new-thread:hover { color: var(--ink); border-color: var(--ink); }
+
+  .privacy-banner {
+    display: none;
+    align-items: center; gap: 12px;
+    padding: 12px 18px;
+    margin-top: 12px;
+    background: var(--gold-faint);
+    border-top: 1px solid var(--gold-soft);
+    border-bottom: 1px solid var(--gold-soft);
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+  }
+  body.thread-private .privacy-banner { display: flex; }
+  .privacy-banner svg { width: 14px; height: 14px; stroke: var(--ink); fill: none; stroke-width: 1.5; flex-shrink: 0; }
+
+  /* the conversation stream itself */
+  .stream {
+    overflow-y: auto;
+    padding: 28px 0 24px;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .stream-inner > * + * { margin-top: 28px; }
+
+  .turn {
+    /* simple appear */
+  }
+  @keyframes turn-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .turn.is-entering { animation: turn-in 0.6s var(--ease); }
+
+  /* user turn — right-aligned marginalia */
+  .turn.user {
+    display: grid; justify-items: end;
+  }
+  .turn.user .turn-body {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--user-ink);
+    max-width: 520px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-right: 2px solid var(--rule);
+    border-top: 1px solid var(--rule-soft);
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .turn.user .turn-meta {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  /* specialist turn — typeset page */
+  .turn.specialist .turn-head {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .turn.specialist .turn-head .chip {
+    --chip: 32px;
+    width: var(--chip); height: var(--chip); border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--orb-1), var(--orb-2) 50%, var(--orb-3) 90%, var(--orb-4));
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic;
+    font-size: 13px; color: var(--orb-1);
+    box-shadow: 0 0 14px rgba(var(--orb-halo), 0.25);
+  }
+  .turn.specialist .turn-head .name {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    color: var(--ink);
+  }
+  .turn.specialist .turn-head .role {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .turn.specialist .turn-body {
+    font-family: var(--serif);
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--ink);
+    max-width: 60ch;
+    text-wrap: pretty;
+    white-space: pre-wrap;
+  }
+  .turn.specialist .turn-body .cursor {
+    display: inline-block;
+    width: 0.5ch;
+    color: var(--gold);
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* plan card — engraved calling card */
+  .plan-card {
+    margin-top: 28px;
+    background: var(--bg-card);
+    border: 1px solid var(--gold-soft);
+    padding: 28px 32px;
+    position: relative;
+    box-shadow: 0 1px 0 var(--gold-faint);
+  }
+  .plan-card.is-entering { animation: plan-in 0.7s var(--ease); animation-delay: 0.1s; }
+  @keyframes plan-in {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .plan-card::before, .plan-card::after {
+    content: ''; position: absolute; pointer-events: none;
+    width: 18px; height: 18px;
+    border: 1px solid var(--gold-deep);
+  }
+  .plan-card::before { top: 6px; left: 6px; border-right: none; border-bottom: none; }
+  .plan-card::after  { bottom: 6px; right: 6px; border-left: none; border-top: none; }
+
+  .plan-eyebrow {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  .plan-eyebrow .sep { opacity: 0.4; padding: 0 8px; }
+  .plan-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    line-height: 1.15;
+    text-align: center;
+    color: var(--ink);
+    margin-bottom: 18px;
+    text-wrap: balance;
+  }
+  .plan-rule {
+    width: 56px; height: 1px;
+    background: var(--gold);
+    margin: 0 auto 22px;
+    opacity: 0.6;
+  }
+  .plan-rows {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px 24px;
+    margin-bottom: 22px;
+  }
+  .plan-rows dt {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: right;
+    padding-top: 4px;
+  }
+  .plan-rows dd {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .plan-rows dd em { font-style: italic; color: var(--ink-soft); }
+
+  .plan-actions-label {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .plan-actions-label::before, .plan-actions-label::after {
+    content: ''; display: inline-block; width: 28px; height: 1px;
+    background: var(--rule); vertical-align: middle; margin: 0 12px;
+  }
+  .plan-action {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 18px;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .plan-action:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .plan-action .pa-text {
+    font-family: var(--serif);
+    font-size: 15.5px;
+    color: var(--ink);
+    line-height: 1.35;
+  }
+  .plan-action .pa-handler {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .plan-action .pa-action {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 14px;
+    border: 1px solid var(--rule);
+    white-space: nowrap;
+    transition: all var(--t-fast) var(--ease);
+    background: var(--bg);
+  }
+  .plan-action .pa-action::after {
+    content: ' →';
+    color: var(--muted);
+    margin-left: 2px;
+    transition: margin var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  }
+  /* Approved by the guest, but not yet confirmed handled by staff. A soft,
+     committed state — the work has left the guest's hands but hasn't landed
+     as "done" yet. Distinct from .is-done (which is the staff confirmation). */
+  .plan-action.is-approved .pa-action {
+    background: var(--bg);
+    color: var(--ink);
+    border-color: var(--ink);
+    opacity: 0.85;
+    cursor: default;
+  }
+  .plan-action.is-approved .pa-action::after {
+    content: ' ·';
+    color: var(--muted);
+  }
+  .plan-action.is-done .pa-action {
+    background: var(--success);
+    color: var(--bg);
+    border-color: var(--success);
+  }
+  .plan-action.is-done .pa-action::after {
+    content: ' ✓';
+    color: var(--bg);
+  }
+
+  /* input — appears at the bottom of dialogue */
+  .input-row {
+    padding: 18px 0 22px;
+    border-top: 1px solid var(--rule-soft);
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 14px;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .input-mic {
+    width: 40px; height: 40px;
+    display: grid; place-items: center;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .input-mic:hover { border-color: var(--ink); }
+  .input-mic.is-live {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .input-mic.is-live svg { stroke: var(--bg); }
+  .input-mic svg { width: 16px; height: 16px; stroke: var(--ink); fill: none; stroke-width: 1.5; }
+  .input-field {
+    width: 100%;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink);
+    padding: 10px 0;
+    background: none;
+    border: none;
+    outline: none;
+  }
+  .input-field::placeholder { color: var(--muted-low); font-style: italic; }
+  .input-send {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 16px;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    background: none;
+    transition: all var(--t-fast) var(--ease);
+  }
+  .input-send:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* the at-rest input — visible when the orb is centered */
+  .at-rest .input-row {
+    border-top: none;
+    max-width: 580px;
+    background: var(--bg-card);
+    border: 1px solid var(--rule);
+    padding: 8px 8px 8px 16px;
+    margin: 18px auto 0;
+  }
+
+  /* ════════════════════════════════════════════
+              PERIPHERY — right column
+  ════════════════════════════════════════════ */
+  .periphery {
+    position: relative;
+    border-left: 1px solid var(--rule-soft);
+    background: var(--bg);
+    padding: 28px 28px 32px;
+    overflow-y: auto;
+    display: grid;
+    align-content: start;
+    gap: 24px;
+    transition: opacity var(--t-norm) var(--ease);
+  }
+  body.in-dialogue .periphery { opacity: 0.85; }
+
+  .periph-section h3 {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .periph-section .lede {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+
+  /* thread cards in periphery */
+  .periph-thread {
+    border-top: 1px solid var(--rule-soft);
+    padding: 12px 0 10px;
+    cursor: pointer;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .periph-thread:hover { background: var(--bg-card); margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+  .periph-thread:last-child { border-bottom: 1px solid var(--rule-soft); }
+
+  /* plan rows in "In motion for you" share the thread row layout but reveal an
+     inline progress panel rather than opening a thread. */
+  .periph-plan {
+    border-top: 1px solid var(--rule-soft);
+    padding: 12px 0 10px;
+    cursor: pointer;
+    transition: background var(--t-fast) var(--ease);
+  }
+  .periph-plan:hover { background: var(--bg-card); margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+  .periph-plan.is-open { background: var(--bg-card); margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+  .periph-plan:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .periph-plan .periph-thread-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .periph-plan .pt-chip {
+    --chip: 26px;
+    width: var(--chip); height: var(--chip); border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--orb-1), var(--orb-2) 50%, var(--orb-3) 90%, var(--orb-4));
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic;
+    font-size: 11px; color: var(--orb-1);
+  }
+  .periph-plan .pt-title { font-family: var(--serif); font-size: 15px; color: var(--ink); line-height: 1.3; }
+  .periph-plan .pt-state { width: 8px; height: 8px; border-radius: 50%; }
+  .periph-plan .pt-state.motion  { background: var(--motion); box-shadow: 0 0 6px var(--motion); }
+  .periph-plan .pt-state.settled { background: var(--settled); }
+  .periph-plan .pt-meta {
+    font-family: var(--sans); font-size: 9.5px; letter-spacing: 0.28em;
+    text-transform: uppercase; color: var(--muted);
+    margin-top: 4px; padding-left: 36px;
+  }
+
+  /* progress panel revealed when a plan row is opened */
+  .plan-progress {
+    margin: 14px 0 4px 36px;
+    padding-top: 12px;
+    border-top: 1px solid var(--rule-soft);
+    animation: pp-fade var(--t-norm) var(--ease);
+  }
+  @keyframes pp-fade { from { opacity: 0; transform: translateY(-2px); } to { opacity: 1; transform: translateY(0); } }
+  .pp-bar {
+    display: grid;
+    grid-template-columns: auto 1fr auto 1fr auto 1fr auto 1fr auto;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .pp-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    border: 1px solid var(--rule);
+    background: transparent;
+    transition: all var(--t-norm) var(--ease);
+  }
+  .pp-dot.is-done { background: var(--gold-deep); border-color: var(--gold-deep); }
+  .pp-dot.is-current {
+    background: var(--gold-deep); border-color: var(--gold-deep);
+    box-shadow: 0 0 0 3px rgba(201, 165, 114, 0.18), 0 0 8px var(--gold-deep);
+  }
+  .pp-seg { height: 1px; background: var(--rule-soft); transition: background var(--t-norm) var(--ease); }
+  .pp-seg.is-done { background: var(--gold-deep); }
+  .pp-labels { display: grid; grid-template-columns: repeat(5, 1fr); margin-bottom: 12px; gap: 4px; }
+  .pp-label {
+    font-family: var(--sans);
+    font-size: 7.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+  .pp-label:first-child { text-align: left; }
+  .pp-label:last-child  { text-align: right; }
+  .pp-label.is-current { color: var(--gold-deep); }
+  .pp-status {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .pp-actions { list-style: none; padding: 0; margin: 8px 0 4px; }
+  .pp-action {
+    display: grid;
+    grid-template-columns: 14px 1fr auto;
+    gap: 8px;
+    align-items: baseline;
+    padding: 4px 0;
+    font-family: var(--sans);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+  }
+  .pp-action-mark { color: var(--muted); font-size: 11px; line-height: 1; }
+  .pp-action.is-approved .pp-action-mark,
+  .pp-action.is-done .pp-action-mark { color: var(--gold-deep); }
+  .pp-action.is-done .pp-action-text { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--rule); }
+  .pp-action-handler {
+    font-size: 8.5px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Specialist follow-up prompt — appears at stage 4 (Complete).
+     Tap opens a fresh thought with the owning specialist, who greets first. */
+  .pp-followup {
+    margin-top: 10px;
+    padding: 12px 14px;
+    border: 1px solid var(--rule-soft);
+    border-left: 2px solid var(--gold-deep);
+    background: var(--bg);
+    cursor: pointer;
+    transition: background var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+  }
+  .pp-followup:hover { background: var(--bg-card); border-color: var(--gold-deep); }
+  .pp-fu-who {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 6px;
+  }
+  .pp-fu-body {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-family: var(--serif);
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .pp-fu-body em { font-style: italic; }
+  .pp-fu-arrow {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--gold-deep);
+    flex-shrink: 0;
+    transition: transform var(--t-fast) var(--ease);
+  }
+  .pp-followup:hover .pp-fu-arrow { transform: translateX(2px); }
+
+  .periph-thread-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .periph-thread .pt-chip {
+    --chip: 26px;
+    width: var(--chip); height: var(--chip); border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--orb-1), var(--orb-2) 50%, var(--orb-3) 90%, var(--orb-4));
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic;
+    font-size: 11px; color: var(--orb-1);
+  }
+  .periph-thread .pt-title {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+  .periph-thread .pt-state {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .periph-thread .pt-state.motion  { background: var(--motion); box-shadow: 0 0 6px var(--motion); }
+  .periph-thread .pt-state.awaits  { background: var(--awaits); }
+  .periph-thread .pt-state.settled { background: var(--settled); }
+  .periph-thread .pt-state.private {
+    background: transparent;
+    border: 1px solid var(--ink);
+    width: 9px; height: 9px;
+  }
+  .periph-thread .pt-meta {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 4px;
+    padding-left: 36px;
+  }
+
+  /* held-in-confidence note */
+  .periph-confidence {
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+    align-items: start;
+  }
+  .periph-confidence svg { width: 14px; height: 14px; stroke: var(--ink); fill: none; stroke-width: 1.5; margin-top: 4px; }
+  .periph-confidence .pc-body {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  /* welcome overlay — the one-line atelier greeting */
+  .welcome {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    max-width: 600px;
+    text-align: center;
+    padding: 36px 48px;
+    background: var(--bg-veil);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--rule);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--t-slow) var(--ease);
+  }
+  .welcome.is-shown { opacity: 1; pointer-events: auto; }
+  .welcome .we-eb {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 16px;
+  }
+  .welcome .we-line {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--ink);
+    text-wrap: balance;
+  }
+
+  /* ════════════════════════════════════════════
+        OVERLAY VIEWS — Dashboard · Constellation
+  ════════════════════════════════════════════ */
+  .overlay {
+    position: fixed;
+    top: var(--bar-h);
+    left: 0; right: 0; bottom: 0;
+    z-index: 80;
+    background: var(--bg);
+    display: none;
+    overflow-y: auto;
+  }
+  .overlay.is-shown { display: block; }
+  /* Keep the top bar visible (so the view-toggle can navigate out); hide only the canvas */
+  body.view-dashboard .canvas,
+  body.view-constellation .canvas { visibility: hidden; }
+  /* Studio bar stays in its property palette on the dashboard. */
+  body.view-dashboard .top-bar { opacity: 1; }
+  /* On constellation, the bar adopts the night-sky palette so labels stay legible. */
+  body.view-constellation .top-bar {
+    background: rgba(20, 12, 8, 0.72);
+    border-bottom-color: rgba(201, 165, 114, 0.18);
+    color: #f0e6cf;
+    opacity: 1;
+  }
+  body.view-constellation .top-bar .bar-brand { color: #c9a572; }
+  body.view-constellation .top-bar .bar-brand em { color: rgba(240, 230, 207, 0.78); }
+  body.view-constellation .top-bar .bar-view { color: rgba(232, 220, 200, 0.65); }
+  body.view-constellation .top-bar .bar-view:hover { color: #f0e6cf; }
+  body.view-constellation .top-bar .bar-view.is-active { background: #f0e6cf; color: #14100c; }
+  body.view-constellation .top-bar .bar-center { background: rgba(20, 12, 8, 0.45); border-color: rgba(201, 165, 114, 0.22); }
+  body.view-constellation .top-bar .bar-suite { color: rgba(240, 230, 207, 0.85); }
+  body.view-constellation .top-bar .bar-suite .sn { color: rgba(232, 220, 200, 0.55); }
+  body.view-constellation .top-bar .bar-mic { color: rgba(232, 220, 200, 0.6); border-color: rgba(201, 165, 114, 0.22); }
+  body.view-constellation .top-bar .bar-mic:hover { color: #f0e6cf; border-color: #c9a572; }
+  body.view-constellation .top-bar .bar-mic .dot { background: rgba(232, 220, 200, 0.5); }
+  body.view-constellation .top-bar .bar-mic.is-live .dot { background: #e8c789; box-shadow: 0 0 8px #e8c789; }
+  body.view-constellation .top-bar .bar-mic.is-live { color: #f0e6cf; border-color: #c9a572; }
+  .overlay .ov-close {
+    position: absolute; top: 24px; right: 40px;
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    background: none;
+    border: 1px solid var(--rule);
+    padding: 8px 14px;
+    z-index: 5;
+  }
+  .overlay .ov-close:hover { color: var(--ink); border-color: var(--ink); }
+
+  /* dashboard */
+  .dashboard {
+    height: 100%;
+    overflow-y: auto;
+    padding: 64px 80px;
+  }
+  .dash-head {
+    text-align: center;
+    margin-bottom: 56px;
+  }
+  .dash-head h1 {
+    font-family: var(--serif);
+    font-size: 56px;
+    font-weight: 300;
+    line-height: 1.0;
+    margin: 12px 0 14px;
+    letter-spacing: -0.01em;
+  }
+  .dash-head h1 em { font-style: italic; }
+  .dash-head .sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 19px;
+    color: var(--ink-soft);
+    max-width: 540px;
+    margin: 0 auto;
+    line-height: 1.55;
+  }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--rule-soft);
+    max-width: 1080px;
+    margin: 0 auto 48px;
+    border: 1px solid var(--rule-soft);
+  }
+  .dash-cell {
+    background: var(--bg);
+    padding: 30px 32px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 240px;
+  }
+  .dash-cell h3 {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 400;
+    margin-bottom: 14px;
+  }
+  .dash-cell .val {
+    font-family: var(--serif);
+    font-size: 46px;
+    font-weight: 300;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .dash-cell .val .sm { font-size: 18px; color: var(--muted); letter-spacing: 0.04em; }
+  .dash-cell .read {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-top: 14px;
+  }
+  .dash-cell .toggle {
+    margin-top: 14px;
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    align-self: end;
+  }
+
+  /* what's in motion */
+  .dash-motion {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+  .dash-motion h2 {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    text-align: center;
+    margin-bottom: 28px;
+    font-weight: 400;
+  }
+  .dash-motion .item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    padding: 22px 0;
+    border-top: 1px solid var(--rule-soft);
+    gap: 24px;
+    align-items: center;
+  }
+  .dash-motion .item:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .dash-motion .item .when {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .dash-motion .item .what {
+    font-family: var(--serif);
+    font-size: 19px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .dash-motion .item .where {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  /* ════════════════════════════════════════════
+                  CONSTELLATION
+  ════════════════════════════════════════════ */
+  /* CONSTELLATION — a working studio map under a warm night sky. */
+  .constellation {
+    color: #f0e6cf;
+    overflow: hidden;
+    /* Layered background — a warm-night-sky with a central nebula bloom and a
+       faint warm horizon. Built entirely in CSS so it doesn't depend on assets. */
+    background:
+      radial-gradient(ellipse 55% 45% at 50% 52%, rgba(201, 165, 114, 0.18) 0%, rgba(160, 134, 84, 0.08) 35%, transparent 65%),
+      radial-gradient(ellipse 80% 30% at 50% 100%, rgba(184, 136, 74, 0.10) 0%, transparent 70%),
+      radial-gradient(ellipse 100% 60% at 50% 0%, rgba(20, 10, 8, 0.5) 0%, transparent 60%),
+      linear-gradient(180deg, #1a0f0a 0%, #0e0807 50%, #14100c 100%);
+  }
+  /* Fine starfield via CSS radial-gradients (no JS, no images) */
+  .constellation::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      /* bright stars (sparse) */
+      radial-gradient(1.5px 1.5px at 12% 18%,  rgba(255, 240, 200, 0.95), transparent 60%),
+      radial-gradient(1.2px 1.2px at 78% 24%,  rgba(255, 240, 200, 0.90), transparent 60%),
+      radial-gradient(1.4px 1.4px at 35% 72%,  rgba(255, 240, 200, 0.95), transparent 60%),
+      radial-gradient(1.3px 1.3px at 88% 81%,  rgba(255, 240, 200, 0.85), transparent 60%),
+      radial-gradient(1.6px 1.6px at 22% 88%,  rgba(255, 240, 200, 0.92), transparent 60%),
+      radial-gradient(1.2px 1.2px at 64% 14%,  rgba(255, 240, 200, 0.88), transparent 60%),
+      radial-gradient(1.4px 1.4px at 8% 56%,   rgba(255, 240, 200, 0.90), transparent 60%),
+      radial-gradient(1.3px 1.3px at 92% 48%,  rgba(255, 240, 200, 0.85), transparent 60%),
+      /* medium stars */
+      radial-gradient(1px 1px at 30% 32%,      rgba(232, 199, 137, 0.7), transparent 65%),
+      radial-gradient(1px 1px at 70% 58%,      rgba(232, 199, 137, 0.7), transparent 65%),
+      radial-gradient(1px 1px at 18% 42%,      rgba(232, 199, 137, 0.65), transparent 65%),
+      radial-gradient(1px 1px at 52% 8%,       rgba(232, 199, 137, 0.65), transparent 65%),
+      radial-gradient(1px 1px at 84% 36%,      rgba(232, 199, 137, 0.6), transparent 65%),
+      radial-gradient(1px 1px at 44% 92%,      rgba(232, 199, 137, 0.65), transparent 65%),
+      radial-gradient(1px 1px at 6% 76%,       rgba(232, 199, 137, 0.6), transparent 65%),
+      radial-gradient(1px 1px at 96% 68%,      rgba(232, 199, 137, 0.7), transparent 65%),
+      radial-gradient(1px 1px at 58% 44%,      rgba(232, 199, 137, 0.55), transparent 65%),
+      radial-gradient(1px 1px at 26% 4%,       rgba(232, 199, 137, 0.6), transparent 65%),
+      /* tiny dust */
+      radial-gradient(0.6px 0.6px at 14% 8%,   rgba(255, 244, 212, 0.5), transparent 70%),
+      radial-gradient(0.6px 0.6px at 48% 24%,  rgba(255, 244, 212, 0.5), transparent 70%),
+      radial-gradient(0.6px 0.6px at 72% 76%,  rgba(255, 244, 212, 0.5), transparent 70%),
+      radial-gradient(0.6px 0.6px at 38% 56%,  rgba(255, 244, 212, 0.45), transparent 70%),
+      radial-gradient(0.6px 0.6px at 86% 12%,  rgba(255, 244, 212, 0.5), transparent 70%),
+      radial-gradient(0.6px 0.6px at 16% 64%,  rgba(255, 244, 212, 0.45), transparent 70%),
+      radial-gradient(0.6px 0.6px at 62% 86%,  rgba(255, 244, 212, 0.5), transparent 70%),
+      radial-gradient(0.6px 0.6px at 4% 28%,   rgba(255, 244, 212, 0.4), transparent 70%),
+      radial-gradient(0.6px 0.6px at 94% 92%,  rgba(255, 244, 212, 0.45), transparent 70%);
+    animation: starfield-twinkle 6s ease-in-out infinite;
+    z-index: 0;
+  }
+  @keyframes starfield-twinkle {
+    0%, 100% { opacity: 0.85; }
+    50%      { opacity: 1; }
+  }
+  /* faint planner's-graph grid overlay above starfield, beneath constellation */
+  .constellation::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(201, 165, 114, 0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 165, 114, 0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mix-blend-mode: screen;
+    opacity: 0.6;
+    z-index: 0;
+  }
+  .constellation .ov-close {
+    color: rgba(232, 226, 212, 0.7);
+    border-color: rgba(232, 226, 212, 0.25);
+    z-index: 5;
+  }
+  .constellation .ov-close:hover { color: #e8e2d4; border-color: #e8e2d4; }
+
+  /* Foreground content sits above the starfield + grid layers */
+  .const-header, .const-stage, .const-legend {
+    position: relative;
+    z-index: 1;
+  }
+  .const-header {
+    position: absolute; top: 36px; left: 50%; transform: translateX(-50%);
+    text-align: center;
+    padding: 0 24px;
+  }
+  .const-header .eb {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.45em;
+    text-transform: uppercase;
+    color: rgba(232, 226, 212, 0.6);
+    margin-bottom: 10px;
+  }
+  .const-header h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 34px;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    color: #f0e6cf;
+    text-shadow: 0 0 24px rgba(232, 199, 137, 0.25);
+  }
+  .const-header h1 em { font-style: italic; }
+  .const-header .sub {
+    font-size: 16px;
+    color: rgba(232, 220, 200, 0.6);
+    max-width: 620px;
+    margin: 12px auto 0;
+    line-height: 1.6;
+    font-family: var(--serif);
+  }
+  .const-header .sub em { font-style: italic; color: rgba(232, 220, 200, 0.85); }
+
+  .const-stage {
+    position: absolute;
+    inset: 130px 32px 80px;
+    overflow: hidden;
+    pointer-events: auto;
+  }
+  .const-stage svg {
+    width: 100%; height: 100%;
+    display: block;
+  }
+  .const-node {
+    cursor: pointer;
+    transition: opacity 0.45s var(--ease);
+  }
+  .const-node:hover { opacity: 0.85; }
+  /* Prezi-style camera: the const-world group is what the camera moves over.
+     Transform is tweened in JS (SVG attribute) — no CSS transition here to avoid
+     fighting per-frame updates. */
+  .const-world { transform-box: view-box; transform-origin: 0 0; }
+  /* When zoomed in, all non-focus nodes dim away so the focus reads cleanly. */
+  body.const-zoomed .const-node.is-dim { opacity: 0.18; pointer-events: none; }
+  body.const-zoomed .const-node.is-focus { opacity: 1; }
+
+  /* Detail card — fades up after the camera lands. */
+  .const-detail {
+    position: absolute;
+    left: 50%;
+    bottom: 96px;
+    transform: translate(-50%, 12px);
+    width: min(560px, calc(100% - 64px));
+    background: rgba(20, 12, 8, 0.78);
+    border: 1px solid rgba(201, 165, 114, 0.28);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 22px 26px 20px;
+    color: #f0e6cf;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.45s var(--ease), transform 0.6s var(--ease-out);
+    z-index: 3;
+  }
+  .const-detail.is-shown {
+    opacity: 1;
+    transform: translate(-50%, 0);
+    pointer-events: auto;
+  }
+  .const-detail .cd-eb {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: #c9a572;
+    margin-bottom: 6px;
+  }
+  .const-detail .cd-eb .dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: 1px;
+  }
+  .const-detail .cd-eb .dot.motion  { background: #e8c789; box-shadow: 0 0 8px rgba(232,199,137,0.6); }
+  .const-detail .cd-eb .dot.awaits  { background: #ffae73; box-shadow: 0 0 8px rgba(255,174,115,0.6); }
+  .const-detail .cd-eb .dot.settled { background: #a0c094; box-shadow: 0 0 6px rgba(160,192,148,0.5); }
+  .const-detail .cd-eb .dot.private { background: transparent; border: 1px solid rgba(232,220,200,0.85); }
+  .const-detail h3 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 26px;
+    line-height: 1.15;
+    margin-bottom: 4px;
+    color: #faf2dd;
+    text-shadow: 0 0 18px rgba(232, 199, 137, 0.2);
+  }
+  .const-detail h3 em { font-style: italic; }
+  .const-detail .cd-role {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(232, 220, 200, 0.7);
+    margin-bottom: 14px;
+  }
+  .const-detail .cd-line {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(232, 220, 200, 0.85);
+    border-left: 1px solid rgba(201, 165, 114, 0.32);
+    padding: 2px 0 2px 12px;
+    margin: 6px 0;
+  }
+  .const-detail .cd-line.is-user { color: rgba(232, 220, 200, 0.55); }
+  .const-detail .cd-plans {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(201, 165, 114, 0.18);
+  }
+  .const-detail .cd-plans h4 {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: rgba(232, 220, 200, 0.55);
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  .const-detail .cd-plan {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 4px 0;
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: rgba(232, 220, 200, 0.9);
+  }
+  .const-detail .cd-plan .pt { color: #c9a572; font-style: italic; }
+  .const-detail .cd-plan .cnt {
+    margin-left: auto;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(232, 220, 200, 0.55);
+  }
+  .const-detail .cd-empty {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(232, 220, 200, 0.5);
+  }
+  .const-detail .cd-actions {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .const-detail .cd-btn {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    padding: 9px 16px;
+    border: 1px solid rgba(232, 220, 200, 0.28);
+    color: rgba(232, 220, 200, 0.85);
+    background: transparent;
+    transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  }
+  .const-detail .cd-btn:hover { color: #14100c; background: #f0e6cf; border-color: #f0e6cf; }
+  .const-detail .cd-btn.is-ghost:hover { color: #f0e6cf; background: transparent; border-color: #c9a572; }
+
+  /* When zoomed: the legend fades back so the card breathes. */
+  body.const-zoomed .const-legend { opacity: 0.35; pointer-events: none; }
+  .const-legend { transition: opacity 0.4s var(--ease); }
+
+  .const-legend {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: center; gap: 36px;
+    padding: 18px 48px 22px;
+    border-top: 1px solid rgba(201, 165, 114, 0.18);
+    background: linear-gradient(180deg, transparent 0%, rgba(40, 26, 16, 0.4) 100%);
+    flex-wrap: wrap;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(232, 220, 200, 0.65);
+  }
+  .const-legend .lg {
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .const-legend .lg-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+  }
+  .const-legend .lg-dot.motion  { background: #e8c789; box-shadow: 0 0 10px rgba(232,199,137,0.55); }
+  .const-legend .lg-dot.awaits  { background: #ffae73; box-shadow: 0 0 10px rgba(255,174,115,0.55); }
+  .const-legend .lg-dot.settled { background: #a0c094; box-shadow: 0 0 8px rgba(160,192,148,0.45); }
+  .const-legend .lg-dot.private {
+    background: transparent;
+    border: 1px solid rgba(232, 220, 200, 0.85);
+    box-shadow: 0 0 8px rgba(232, 220, 200, 0.35);
+  }
+
+  /* Empty state — calm copy with a small still orb */
+  .const-empty {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    z-index: 1;
+    padding: 0 40px;
+  }
+  .const-empty-title {
+    font-family: var(--serif);
+    font-size: 28px;
+    color: #f0e6cf;
+    margin: 22px 0 12px;
+    text-shadow: 0 0 24px rgba(232, 199, 137, 0.2);
+  }
+  .const-empty-body {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.65;
+    color: rgba(232, 220, 200, 0.55);
+    max-width: 380px;
+  }
+  .const-empty-body em { color: rgba(232, 220, 200, 0.8); font-style: italic; }
+
+  /* presenter shortcut hint — a tiny "?" toggle in the corner */
+  .hint-toggle {
+    position: fixed;
+    bottom: 12px;
+    right: 16px;
+    z-index: 75;
+    width: 24px; height: 24px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-veil);
+    border: 1px solid var(--rule-soft);
+    border-radius: 50%;
+    color: var(--muted);
+    font-family: var(--serif);
+    font-size: 13px;
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+  }
+  .hint-toggle:hover { opacity: 1; color: var(--ink); }
+  body.cover-active .hint-toggle { display: none; }
+
+  .hint {
+    position: fixed; bottom: 44px; right: 16px;
+    z-index: 74;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 12px 14px;
+    background: var(--bg-veil);
+    border: 1px solid var(--rule-soft);
+    pointer-events: none;
+    line-height: 1.9;
+    text-align: right;
+    max-width: 220px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  }
+  body.hint-shown .hint { opacity: 1; transform: none; pointer-events: auto; }
+  body.cover-active .hint { display: none; }
+  .hint .row { white-space: nowrap; display: block; }
+  .hint kbd {
+    font-family: var(--serif);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+    font-size: 11px;
+    padding: 0 2px;
+  }
+
+  /* responsive — keep periphery hidden on narrow viewports so the studio breathes */
+  @media (max-width: 1180px) {
+    .canvas { grid-template-columns: 1fr !important; }
+    .periphery { display: none !important; }
+    .at-rest { padding: 24px 32px 18px; }
+    .dialogue { padding: 18px 36px 0; }
+    .top-bar { padding: 14px 28px; }
+    .bar-suite { display: none; }
+  }
+  @media (max-height: 760px) {
+    #orb { --orb-size: 180px !important; }
+    .at-rest-prompt { font-size: 19px; }
+    .at-rest-orb-wrap { gap: 16px; }
+    .suggestion { padding: 12px 8px 10px; }
+    .suggestion .chip { --chip: 36px; }
+    .suggestion .label { font-size: 14px; }
+  }
+  @media (max-height: 620px) {
+    #orb { --orb-size: 140px !important; }
+    .at-rest-prompt { font-size: 17px; }
+    .at-rest { padding: 18px 32px 14px; }
+  }
+  @media (max-width: 800px) {
+    .top-bar { grid-template-columns: 1fr auto; }
+    .bar-center { display: none; }
+    .cover-mid { padding: 0 4vw; }
+  }
+</style>
+</head>
+<body class="cover-active">
+
+  <!-- atmosphere: full-bleed property hour gradient -->
+  <div class="atmosphere" id="atmosphere"></div>
+
+  <!-- ────────────── COVER ────────────── -->
+  <section class="cover" id="cover">
+    <div class="cover-veil"></div>
+
+    <div class="cover-top">
+      <div class="cover-wordmark">ROSEWOOD</div>
+      <button class="cover-about-btn" id="cover-about-open" type="button" aria-label="Why the Atelier">
+        <span class="cover-about-ico" aria-hidden="true">i</span>
+        <span>Why</span>
+        <em>the&nbsp;Atelier</em>
+      </button>
+      <div class="cover-meta">
+        <div id="cover-property-name">Rosewood Sand Hill</div>
+        <em id="cover-property-suite">The Madera Residence</em>
+      </div>
+    </div>
+
+    <div class="cover-mid">
+      <div class="eyebrow lg" style="color: rgba(247, 238, 216, 0.7);">The Atelier</div>
+      <h1 class="cover-title">A studio<br/><em>prepared</em> in your suite.</h1>
+      <div class="cover-rule"></div>
+      <p class="cover-essay">A host, a roster of specialists, a quiet room to think in &mdash; available by voice and by typing, throughout your stay.</p>
+      <button class="cover-enter" id="enter-studio">
+        <span class="dot"></span>
+        Enter the studio
+      </button>
+    </div>
+
+    <div class="cover-bottom">
+      <div class="cover-properties" id="cover-properties"></div>
+    </div>
+  </section>
+
+  <!-- ────────────── STUDIO ────────────── -->
+  <main class="studio">
+    <!-- top bar -->
+    <header class="top-bar">
+      <div class="bar-left">
+        <div class="bar-brand">
+          THE ATELIER
+          <em id="bar-property">at Rosewood Sand Hill</em>
+        </div>
+      </div>
+
+      <div class="bar-center" role="tablist">
+        <button class="bar-view is-active" data-view="studio">The Studio</button>
+        <button class="bar-view" data-view="dashboard">Your State</button>
+        <button class="bar-view" data-view="constellation">The Constellation</button>
+      </div>
+
+      <div class="bar-right">
+        <div class="bar-suite">
+          <span class="sn">In Residence</span>
+          Daniel Park &middot; <em id="bar-suite">The Madera Residence</em>
+        </div>
+        <button class="bar-mic" id="mic-toggle" aria-label="Toggle voice">
+          <span class="dot"></span>
+          Voice <span id="mic-state">on</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- canvas: stage + periphery -->
+    <div class="canvas">
+
+      <!-- the stage holds AT-REST and DIALOGUE in the same area, crossfading -->
+      <div class="stage">
+
+        <!-- AT-REST CONSTELLATION -->
+        <div class="at-rest" id="at-rest">
+          <div class="at-rest-orb-wrap">
+            <div class="at-rest-eyebrow" id="at-rest-eyebrow"><span class="dot"></span><span id="at-rest-eyebrow-text">Speak <em>Atelier</em> to begin &middot; or tap the mic below</span></div>
+            <atelier-orb id="orb" size="240"></atelier-orb>
+            <div class="at-rest-prompt" id="at-rest-prompt">What is on your mind tonight?</div>
+
+            <!-- Prominent push-to-talk affordance. The wake word is the
+                 primary path, but the mic button here is the always-works backup. -->
+            <button type="button" class="ptt-button" id="ptt-button" aria-label="Tap to speak">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="9" y="3" width="6" height="12" rx="3"/>
+                <path d="M5 11a7 7 0 0 0 14 0"/>
+                <line x1="12" y1="18" x2="12" y2="22"/>
+              </svg>
+              <span class="ptt-label" id="ptt-label">Tap to speak</span>
+            </button>
+
+            <!-- The Atelier's "whisper" — a light, transient reply for greetings / vague
+                 / clarifying interactions. Persists on the at-rest canvas; no thread takeover. -->
+            <div class="atelier-whisper" id="atelier-whisper" aria-live="polite" hidden>
+              <div class="aw-eb"><span class="dot"></span>The Atelier</div>
+              <div class="aw-body" id="atelier-whisper-body"></div>
+              <button class="aw-close" id="atelier-whisper-close" aria-label="Dismiss">×</button>
+            </div>
+            <form class="input-row" id="at-rest-form">
+              <button type="button" class="input-mic" id="at-rest-mic" aria-label="Speak">
+                <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+              </button>
+              <input class="input-field" id="at-rest-input" placeholder="Speak, or type what is on your mind&hellip;" autocomplete="off" />
+              <button type="submit" class="input-send">Send</button>
+            </form>
+          </div>
+          <div>
+            <div class="suggestions" id="suggestions"></div>
+            <div class="all-specialists"><button id="see-all-specialists">See all <span id="specialist-count">15</span> specialists</button></div>
+          </div>
+        </div>
+
+        <!-- DIALOGUE (in-conversation page) -->
+        <div class="dialogue" id="dialogue">
+          <div class="dialogue-head">
+            <div class="head-orb"><atelier-orb size="56"></atelier-orb></div>
+            <div class="head-title" id="dialogue-title">
+              <span class="who" id="dialogue-who">THE STRATEGIST &middot; deals &middot; structure &middot; negotiation</span>
+              <em id="dialogue-thread">Series B in motion</em>
+            </div>
+            <div class="head-actions">
+              <button class="lock-btn" id="lock-btn" aria-label="Hold in confidence" title="Hold in confidence">
+                <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+              </button>
+              <button class="new-thread" id="new-thread" title="Start a new thought — this one stays held in the periphery">+ New thought</button>
+              <button class="close-thread" id="close-thread">Close</button>
+            </div>
+          </div>
+
+          <div class="privacy-banner">
+            <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+            This thread is held in confidence &mdash; not visible to property staff.
+          </div>
+
+          <div class="stream" id="stream">
+            <div class="stream-inner" id="stream-inner"></div>
+          </div>
+
+          <form class="input-row" id="dialogue-form">
+            <button type="button" class="input-mic" id="dialogue-mic" aria-label="Speak">
+              <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><line x1="12" y1="18" x2="12" y2="22"/></svg>
+            </button>
+            <input class="input-field" id="dialogue-input" placeholder="Continue the thread&hellip;" autocomplete="off" />
+            <button type="submit" class="input-send">Send</button>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- PERIPHERY: what's in motion / held in confidence / atelier note -->
+      <aside class="periphery" id="periphery">
+        <!-- contents rendered by JS -->
+      </aside>
+    </div>
+  </main>
+
+  <!-- ────────────── ABOUT: Why the Atelier ────────────── -->
+  <section class="about" id="about" aria-hidden="true" aria-label="Why the Atelier">
+    <div class="about-head">
+      <div class="about-brand">ROSEWOOD <em>The Atelier</em></div>
+      <button class="about-close" id="about-close" type="button">Close</button>
+    </div>
+
+    <div class="about-stage">
+
+      <!-- ── 1. THE WHY ── -->
+      <article class="about-slide is-active" data-slide="0">
+        <div class="about-visual" aria-hidden="true">
+          <svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-linecap="round">
+            <!-- faint horizon — the property -->
+            <path d="M 40 284 Q 200 196 360 284" stroke-width="0.6" opacity="0.35"/>
+            <!-- moments of presence — discrete, beautiful, bounded -->
+            <g>
+              <circle cx="100" cy="246" r="3.5" fill="currentColor" opacity="0.9"/>
+              <circle cx="100" cy="246" r="14" stroke-width="0.7" opacity="0.55"/>
+              <circle cx="100" cy="246" r="28" stroke-width="0.5" stroke-dasharray="1 4" opacity="0.30"/>
+            </g>
+            <g>
+              <circle cx="200" cy="216" r="4.5" fill="currentColor" opacity="0.95"/>
+              <circle cx="200" cy="216" r="18" stroke-width="0.7" opacity="0.65"/>
+              <circle cx="200" cy="216" r="36" stroke-width="0.5" stroke-dasharray="1 4" opacity="0.35"/>
+            </g>
+            <g>
+              <circle cx="300" cy="246" r="3.5" fill="currentColor" opacity="0.9"/>
+              <circle cx="300" cy="246" r="14" stroke-width="0.7" opacity="0.55"/>
+              <circle cx="300" cy="246" r="28" stroke-width="0.5" stroke-dasharray="1 4" opacity="0.30"/>
+            </g>
+            <!-- attention trails off at the edges -->
+            <g stroke-width="0.4" opacity="0.22">
+              <line x1="22"  y1="294" x2="40"  y2="286"/>
+              <line x1="360" y1="286" x2="378" y2="294"/>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="8.5" letter-spacing="2.5" fill="currentColor">
+              <text x="200" y="134" text-anchor="middle" opacity="0.75">WHERE PRESENCE REACHES</text>
+              <text x="200" y="348" text-anchor="middle" opacity="0.50">EVERY OTHER HOUR</text>
+            </g>
+          </svg>
+        </div>
+        <div class="about-copy">
+          <div class="eb">Why the Atelier</div>
+          <h2>The art of attention,<br/><em>one suite at a time.</em></h2>
+          <p>Rosewood already runs the world's finest human personalization. Butlers who anticipate. Concierges who remember. Florists who notice. The choice of pillow you never named twice; the whispered note before dinner.</p>
+          <p>But the very best of this lives where staff happen to be, for the guests they happen to know. Every other suite, every other hour, is bound by who is on shift.</p>
+        </div>
+      </article>
+
+      <!-- ── 2. WHAT THE ATELIER IS ── -->
+      <article class="about-slide" data-slide="1">
+        <div class="about-visual" aria-hidden="true">
+          <svg viewBox="0 0 400 400" fill="none" stroke="currentColor" stroke-linecap="round">
+            <!-- outer rings: what the studio holds -->
+            <circle cx="200" cy="200" r="178" stroke-width="0.6" opacity="0.20"/>
+            <circle cx="200" cy="200" r="138" stroke-width="0.6" stroke-dasharray="1 5" opacity="0.32"/>
+            <circle cx="200" cy="200" r="98"  stroke-width="0.6" stroke-dasharray="1 5" opacity="0.45"/>
+            <!-- inner ring: human memory -->
+            <circle cx="200" cy="200" r="56"  stroke-width="0.8" opacity="0.70"/>
+            <!-- core -->
+            <circle cx="200" cy="200" r="7"  fill="currentColor" opacity="0.95"/>
+            <circle cx="200" cy="200" r="18" stroke-width="0.6" opacity="0.55"/>
+            <!-- whisper ticks around the outer ring -->
+            <g opacity="0.55">
+              <circle cx="200" cy="22"  r="2" fill="currentColor"/>
+              <circle cx="378" cy="200" r="2" fill="currentColor"/>
+              <circle cx="200" cy="378" r="2" fill="currentColor"/>
+              <circle cx="22"  cy="200" r="2" fill="currentColor"/>
+              <circle cx="326" cy="74"  r="1.6" fill="currentColor" opacity="0.7"/>
+              <circle cx="326" cy="326" r="1.6" fill="currentColor" opacity="0.7"/>
+              <circle cx="74"  cy="326" r="1.6" fill="currentColor" opacity="0.7"/>
+              <circle cx="74"  cy="74"  r="1.6" fill="currentColor" opacity="0.7"/>
+            </g>
+            <!-- captions inside the rings -->
+            <g font-family="Inter, sans-serif" font-size="8.5" letter-spacing="2.5" fill="currentColor">
+              <text x="200" y="148" text-anchor="middle" opacity="0.85">WHAT STAFF REMEMBER</text>
+              <text x="200" y="58"  text-anchor="middle" opacity="0.55">WHAT THE STUDIO HOLDS</text>
+            </g>
+          </svg>
+        </div>
+        <div class="about-copy">
+          <div class="eb">What the Atelier is</div>
+          <h2>A studio that holds<br/>the <em>reason</em> you came.</h2>
+          <p>Every visit has a purpose &mdash; a deal, a wedding, a recovery, a question you could not put down. The Atelier is the avenue where that purpose, and the thoughts around it, are held throughout the stay.</p>
+          <ul>
+            <li>The <em>purpose</em> of every visit, tracked from first word to farewell.</li>
+            <li><em>Thoughts</em> held only as the guest invites &mdash; nothing more.</li>
+            <li><em>Ideas</em> explored freely; <em>actions</em> set in motion when chosen.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ── 3. FOR THE GUEST ── -->
+      <article class="about-slide" data-slide="2">
+        <div class="about-visual" aria-hidden="true">
+          <svg viewBox="0 0 400 400" fill="none">
+            <defs>
+              <radialGradient id="about-orb-g" cx="50%" cy="45%" r="55%">
+                <stop offset="0%"   stop-color="#fff8d9" stop-opacity="0.95"/>
+                <stop offset="55%"  stop-color="#d8b878" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#5a4a2a" stop-opacity="0.6"/>
+              </radialGradient>
+            </defs>
+            <!-- soft halo -->
+            <circle cx="200" cy="200" r="120" fill="url(#about-orb-g)" opacity="0.15"/>
+            <!-- connector lines to specialists -->
+            <g stroke="currentColor" stroke-width="0.6" opacity="0.40">
+              <line x1="200" y1="200" x2="80"  y2="100"/>
+              <line x1="200" y1="200" x2="320" y2="100"/>
+              <line x1="200" y1="200" x2="50"  y2="250"/>
+              <line x1="200" y1="200" x2="350" y2="250"/>
+              <line x1="200" y1="200" x2="200" y2="350"/>
+            </g>
+            <!-- specialist nodes -->
+            <g fill="currentColor">
+              <circle cx="80"  cy="100" r="4" opacity="0.92"/>
+              <circle cx="320" cy="100" r="4" opacity="0.92"/>
+              <circle cx="50"  cy="250" r="4" opacity="0.92"/>
+              <circle cx="350" cy="250" r="4" opacity="0.92"/>
+              <circle cx="200" cy="350" r="4" opacity="0.92"/>
+            </g>
+            <g fill="currentColor" opacity="0.55">
+              <circle cx="80"  cy="100" r="11" fill="none" stroke="currentColor" stroke-width="0.6"/>
+              <circle cx="320" cy="100" r="11" fill="none" stroke="currentColor" stroke-width="0.6"/>
+              <circle cx="50"  cy="250" r="11" fill="none" stroke="currentColor" stroke-width="0.6"/>
+              <circle cx="350" cy="250" r="11" fill="none" stroke="currentColor" stroke-width="0.6"/>
+              <circle cx="200" cy="350" r="11" fill="none" stroke="currentColor" stroke-width="0.6"/>
+            </g>
+            <!-- the orb -->
+            <circle cx="200" cy="200" r="62" fill="url(#about-orb-g)"/>
+            <circle cx="200" cy="200" r="62" fill="none" stroke="currentColor" stroke-width="0.6" opacity="0.45"/>
+            <circle cx="200" cy="200" r="34" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.40"/>
+            <!-- labels -->
+            <g font-family="Inter, sans-serif" font-size="8.5" letter-spacing="2.5" fill="currentColor" opacity="0.75">
+              <text x="80"  y="80"  text-anchor="middle">STRATEGIST</text>
+              <text x="320" y="80"  text-anchor="middle">CURATOR</text>
+              <text x="50"  y="278" text-anchor="middle">WRITER</text>
+              <text x="350" y="278" text-anchor="middle">SOMMELIER</text>
+              <text x="200" y="378" text-anchor="middle">CONVENER</text>
+            </g>
+          </svg>
+        </div>
+        <div class="about-copy">
+          <div class="eb">For the guest</div>
+          <h2>A studio <em>prepared</em><br/>in your suite.</h2>
+          <p>Speak the word <em>Atelier</em> and a roster of specialists arrives. A Strategist for the deal you are closing. A Curator for the evening you are planning. A Writer for the speech you are giving. A Sommelier who serves every table &mdash; whatever the table calls for.</p>
+          <ul>
+            <li>Think aloud with a specialist who knows the property &mdash; and you.</li>
+            <li>Mark any thought <em>private</em> &mdash; never visible to staff.</li>
+            <li>Carry the thread between properties, from Sand Hill to Hong Kong.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ── 4. FOR THE TEAM ── -->
+      <article class="about-slide" data-slide="3">
+        <div class="about-visual" aria-hidden="true">
+          <svg viewBox="0 0 400 400" fill="none" stroke="currentColor">
+            <!-- aerial property frame -->
+            <rect x="40" y="60" width="320" height="220" stroke-width="0.7" opacity="0.45"/>
+            <!-- grid of suites -->
+            <g stroke-width="0.5" opacity="0.32">
+              <line x1="120" y1="60"  x2="120" y2="280"/>
+              <line x1="200" y1="60"  x2="200" y2="280"/>
+              <line x1="280" y1="60"  x2="280" y2="280"/>
+              <line x1="40"  y1="170" x2="360" y2="170"/>
+            </g>
+            <!-- suite dots, one highlighted -->
+            <g fill="currentColor">
+              <circle cx="80"  cy="115" r="2.5" opacity="0.45"/>
+              <circle cx="160" cy="115" r="2.5" opacity="0.45"/>
+              <circle cx="240" cy="115" r="2.5" opacity="0.45"/>
+              <circle cx="320" cy="115" r="2.5" opacity="0.45"/>
+              <circle cx="80"  cy="225" r="2.5" opacity="0.45"/>
+              <circle cx="240" cy="225" r="2.5" opacity="0.45"/>
+              <circle cx="320" cy="225" r="2.5" opacity="0.45"/>
+              <!-- the highlighted suite -->
+              <circle cx="160" cy="225" r="6"  opacity="0.95"/>
+              <circle cx="160" cy="225" r="14" fill="none" stroke="currentColor" stroke-width="0.7" opacity="0.7"/>
+              <circle cx="160" cy="225" r="22" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.4"/>
+            </g>
+            <!-- brief card linked to the suite -->
+            <g opacity="0.85">
+              <line x1="172" y1="225" x2="220" y2="320" stroke-width="0.5" opacity="0.5"/>
+              <rect x="220" y="300" width="140" height="60" stroke-width="0.6" fill="rgba(0,0,0,0.18)"/>
+              <line x1="232" y1="318" x2="332" y2="318" stroke-width="0.5" opacity="0.55"/>
+              <line x1="232" y1="332" x2="320" y2="332" stroke-width="0.5" opacity="0.40"/>
+              <line x1="232" y1="346" x2="300" y2="346" stroke-width="0.5" opacity="0.30"/>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="7.5" letter-spacing="2.5" fill="currentColor">
+              <text x="60"  y="50" opacity="0.6">PROPERTY · AERIAL</text>
+              <text x="232" y="312" opacity="0.7">SUITE BRIEF</text>
+            </g>
+          </svg>
+        </div>
+        <div class="about-copy">
+          <div class="eb">For the team</div>
+          <h2>A thirty-year head<br/>concierge, <em>in every pocket.</em></h2>
+          <p>The Atelier briefs every team member before they cross the suite's threshold. What is celebrating. What is at stake. What was promised this morning. What the guest would never think to say twice.</p>
+          <ul>
+            <li>Plans arrive as structured actions &mdash; <em>one tap to commit</em>, one tap to acknowledge the guest.</li>
+            <li>Property-wide visibility &mdash; every suite, every plan in motion, every quiet thread.</li>
+            <li>The whole team becomes as anticipatory as the property's very best.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- ── 5. THE PROMISE ── -->
+      <article class="about-slide is-finale" data-slide="4">
+        <div class="about-copy">
+          <div class="about-finale-mark" aria-hidden="true">
+            <span class="rw">ROSEWOOD</span>
+            <span class="dot"></span>
+            <em>The Atelier</em>
+          </div>
+          <h2>Come for the suite.<br/><em>Stay for the thinking.</em></h2>
+          <div class="about-rule"></div>
+          <p>Whatever brought you to Rosewood &mdash; a deal, a wedding, a recovery, a question you could not put down &mdash; we make sure you are at your physical and mental peak when it happens.</p>
+          <p class="about-finale-tag"><em>Voice-first. Held in confidence. Available in every suite, throughout your stay.</em></p>
+        </div>
+      </article>
+
+    </div>
+
+    <div class="about-foot">
+      <div class="about-progress">
+        <em id="about-step">01</em> &mdash; of &mdash; <em>05</em>
+      </div>
+      <div class="about-dots" id="about-dots" role="tablist">
+        <button class="about-dot is-active" data-go="0" aria-label="Why the Atelier"></button>
+        <button class="about-dot"           data-go="1" aria-label="What the Atelier is"></button>
+        <button class="about-dot"           data-go="2" aria-label="For the guest"></button>
+        <button class="about-dot"           data-go="3" aria-label="For the team"></button>
+        <button class="about-dot"           data-go="4" aria-label="The promise"></button>
+      </div>
+      <div class="about-nav">
+        <button id="about-prev" type="button" disabled>Back</button>
+        <button id="about-next" type="button" class="is-primary">Continue</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Welcome overlay -->
+  <div class="welcome" id="welcome">
+    <div class="we-eb">Prepared in your suite</div>
+    <div class="we-line" id="welcome-line"></div>
+  </div>
+
+  <!-- Dashboard overlay -->
+  <section class="overlay dashboard" id="dashboard">
+    <button class="ov-close" data-view-close>Return to the studio</button>
+    <div class="dash-head">
+      <div class="eyebrow">Your state</div>
+      <h1>How you are<br/><em>arriving here, now</em></h1>
+      <p class="sub">A quiet read of what is on your mind, in your body, and on your calendar. Visible only to you, shaped by what you have chosen to share with the studio &mdash; nothing more.</p>
+    </div>
+    <div class="dash-grid" id="dash-grid"></div>
+    <div class="dash-motion">
+      <h2>What is in motion</h2>
+      <div id="dash-motion-list"></div>
+    </div>
+  </section>
+
+  <!-- Constellation overlay — a working studio map under a warm night sky -->
+  <section class="overlay constellation" id="constellation">
+    <button class="ov-close" data-view-close>Return to the studio</button>
+    <div class="const-header">
+      <div class="eb">The Constellation</div>
+      <h1>What is <em>in flight</em>, what awaits, what has settled.</h1>
+      <div class="sub">Each thread a satellite of <em>the Atelier</em> at the center.</div>
+    </div>
+    <div class="const-stage" id="const-stage"></div>
+    <div class="const-legend">
+      <span class="lg"><span class="lg-dot motion"></span>In motion</span>
+      <span class="lg"><span class="lg-dot awaits"></span>Awaits you</span>
+      <span class="lg"><span class="lg-dot settled"></span>Settled</span>
+      <span class="lg"><span class="lg-dot private"></span>Held in confidence</span>
+    </div>
+  </section>
+
+  <!-- Tiny "?" toggle in the corner; opens a small shortcut cheat sheet -->
+  <button class="hint-toggle" id="hint-toggle" aria-label="Keyboard shortcuts" title="Keyboard shortcuts">?</button>
+  <div class="hint" id="hint" aria-hidden="true">
+    <span class="row"><kbd>&#8984; 1</kbd> studio</span>
+    <span class="row"><kbd>&#8984; 2</kbd> seam moment</span>
+    <span class="row"><kbd>&#8984; 3</kbd> constellation</span>
+    <span class="row"><kbd>&#8984; 4</kbd> your state</span>
+    <span class="row"><kbd>&#8984; L</kbd> private</span>
+    <span class="row"><kbd>&#8984; &#9251;</kbd> wake mic</span>
+    <span class="row"><kbd>esc</kbd> back to studio</span>
+  </div>
+
+  <!-- Local key seed (gitignored). Loads keys onto window.__local_keys -->
+  <script src=".local-keys.js" onerror="void(0)"></script>
+
+  <!-- Cache-buster query string so Chrome cannot serve stale JS during dev -->
+  <script>document.write('<scr' + 'ipt src="atelier-data.js?v=' + Date.now() + '"></scr' + 'ipt>');</script>
+  <script>document.write('<scr' + 'ipt src="atelier-orb.js?v=' + Date.now() + '"></scr' + 'ipt>');</script>
+  <script>document.write('<scr' + 'ipt src="atelier-app.js?v=' + Date.now() + '"></scr' + 'ipt>');</script>
+
+  <!-- About / "Why the Atelier" presentation — self-contained -->
+  <script>
+    (function () {
+      const about    = document.getElementById('about');
+      const openBtn  = document.getElementById('cover-about-open');
+      const closeBtn = document.getElementById('about-close');
+      const prevBtn  = document.getElementById('about-prev');
+      const nextBtn  = document.getElementById('about-next');
+      const step     = document.getElementById('about-step');
+      const slides   = Array.from(about.querySelectorAll('.about-slide'));
+      const dots     = Array.from(about.querySelectorAll('.about-dot'));
+      const total    = slides.length;
+      let idx = 0;
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+
+      function go(n) {
+        idx = Math.max(0, Math.min(total - 1, n));
+        slides.forEach((s, i) => s.classList.toggle('is-active', i === idx));
+        dots.forEach((d, i)   => d.classList.toggle('is-active', i === idx));
+        step.textContent = pad(idx + 1);
+        prevBtn.disabled = (idx === 0);
+        nextBtn.textContent = (idx === total - 1) ? 'Enter the studio' : 'Continue';
+      }
+
+      function open() {
+        document.body.classList.add('about-open');
+        about.setAttribute('aria-hidden', 'false');
+        go(0);
+      }
+      function close() {
+        document.body.classList.remove('about-open');
+        about.setAttribute('aria-hidden', 'true');
+      }
+
+      openBtn  && openBtn.addEventListener('click', open);
+      closeBtn && closeBtn.addEventListener('click', close);
+      prevBtn.addEventListener('click', () => go(idx - 1));
+      nextBtn.addEventListener('click', () => {
+        if (idx === total - 1) {
+          close();
+          // if the cover is still up, let the guest "enter the studio" themselves
+          // (no auto-advance — they may want to switch property first)
+        } else {
+          go(idx + 1);
+        }
+      });
+      dots.forEach(d => d.addEventListener('click', () => go(parseInt(d.dataset.go, 10))));
+
+      document.addEventListener('keydown', (e) => {
+        if (!document.body.classList.contains('about-open')) return;
+        if (e.key === 'Escape')     { e.preventDefault(); close(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); go(idx + 1); }
+        else if (e.key === 'ArrowLeft')  { e.preventDefault(); go(idx - 1); }
+      });
+    })();
+  </script>
+</body>
+</html>

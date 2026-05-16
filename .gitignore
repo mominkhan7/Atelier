@@ -1,0 +1,21 @@
+# Local key seed — contains API keys, never commit
+.local-keys.js
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Internal docs — strategy, technical contract, design language, demo materials.
+# Not for public repo.
+docs/STRATEGY.md
+docs/LOGIC.md
+docs/DESIGN_LANGUAGE.md
+docs/DEMO_NOTES.md
+docs/DEMO_SCRIPTS.md
+
+# Local Claude Code settings — leaks local paths and workflow
+.claude/

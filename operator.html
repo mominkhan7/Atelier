@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en" data-property="sandhill">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Atelier · Floor · Rosewood Sand Hill</title>
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='%23a08654' stroke-width='3'/%3E%3C/svg%3E" type="image/svg+xml" />
+
+<link rel="stylesheet" href="atelier-tokens.css" />
+
+<style>
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+  }
+
+  /* ────────────── TOP STRIP ────────────── */
+  .op-bar {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    padding: 16px 36px;
+    border-bottom: 1px solid var(--rule-soft);
+    background: var(--bg-veil);
+    z-index: 10;
+  }
+  .op-bar .left {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .op-bar .left em {
+    font-family: var(--serif);
+    font-style: italic;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    color: var(--ink-soft);
+    font-size: 14px;
+    margin-left: 8px;
+  }
+  .op-bar .center {
+    text-align: center;
+  }
+  .op-bar .center .when {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .op-bar .center .eb {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 2px;
+  }
+  .op-bar .right {
+    display: flex; justify-content: flex-end; gap: 22px; align-items: center;
+  }
+  .op-bar .stat {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink-soft);
+    border-left: 1px solid var(--rule);
+    padding-left: 16px;
+    line-height: 1.15;
+  }
+  .op-bar .stat:first-child { border-left: none; padding-left: 0; }
+  .op-bar .stat strong { font-weight: 400; font-size: 22px; color: var(--ink); margin-right: 6px; }
+  .op-bar .stat em { font-style: italic; }
+  .op-bar .stat .sub {
+    display: block;
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  /* ────────────── MAIN LAYOUT ────────────── */
+  .op-canvas {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    height: calc(100vh - 70px);
+  }
+  @media (max-width: 1200px) {
+    .op-canvas { grid-template-columns: 1fr; }
+    .op-firehose { display: none; }
+  }
+
+  /* ────────────── AERIAL ────────────── */
+  .op-aerial {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 50%, var(--bg-card) 0%, var(--bg) 70%);
+  }
+  .op-aerial::before {
+    /* a faint blueprint grid */
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(to right, var(--rule-soft) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--rule-soft) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.25;
+    pointer-events: none;
+  }
+
+  .aerial-title {
+    position: absolute; top: 26px; left: 36px;
+    z-index: 4;
+  }
+  .aerial-title .eb {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 6px;
+  }
+  .aerial-title h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 28px;
+    line-height: 1.05;
+    color: var(--ink);
+  }
+  .aerial-title h1 em { font-style: italic; }
+
+  .aerial-legend {
+    position: absolute; bottom: 24px; left: 36px;
+    z-index: 4;
+    display: flex; gap: 18px; align-items: center;
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .aerial-legend .lg-item { display: flex; gap: 7px; align-items: center; }
+  .aerial-legend .lg-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Property plan SVG holds the blueprint */
+  .aerial-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+  }
+  .aerial-svg text { font-family: var(--sans); font-size: 9px; letter-spacing: 0.24em; text-transform: uppercase; fill: var(--muted); }
+  .aerial-svg .label-serif { font-family: var(--serif); font-style: italic; font-size: 13px; fill: var(--ink-soft); letter-spacing: 0; text-transform: none; }
+  .aerial-svg .building {
+    fill: var(--bg-card);
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+  .aerial-svg .courtyard {
+    fill: var(--bg-deep);
+    fill-opacity: 0.5;
+    stroke: var(--rule-soft);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+  .aerial-svg .path {
+    fill: none; stroke: var(--rule-soft); stroke-width: 1; stroke-dasharray: 2 3;
+  }
+
+  /* suites — clickable rectangles */
+  .suite {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  .suite rect.s-fill {
+    fill: var(--bg-card);
+    stroke: var(--rule);
+    stroke-width: 1.2;
+    transition: fill 0.3s ease, stroke 0.3s ease;
+  }
+  .suite text { fill: var(--ink-soft); }
+
+  /* state styles */
+  .suite[data-state="motion"] rect.s-fill {
+    fill: var(--gold-faint);
+    stroke: var(--gold);
+    stroke-width: 1.4;
+  }
+  .suite[data-state="awaits"] rect.s-fill {
+    fill: rgba(var(--orb-halo), 0.06);
+    stroke: var(--review);
+    stroke-width: 1.6;
+  }
+  .suite[data-state="settled"] rect.s-fill {
+    fill: var(--bg-card);
+    stroke: var(--success);
+  }
+  .suite[data-private="true"] rect.s-fill {
+    stroke-dasharray: 3 3;
+  }
+  .suite.is-active rect.s-fill {
+    stroke: var(--gold-deep);
+    stroke-width: 2.2;
+  }
+
+  .suite-pulse {
+    fill: var(--gold);
+    opacity: 0.0;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .suite[data-state="motion"] .suite-pulse,
+  .suite[data-state="awaits"] .suite-pulse {
+    animation: suite-pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes suite-pulse {
+    0%, 100% { opacity: 0; transform: scale(1.0); }
+    50%      { opacity: 0.55; transform: scale(1.6); }
+  }
+  .suite[data-state="awaits"] .suite-pulse { fill: var(--review); }
+
+  /* the brief panel */
+  .brief {
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 460px;
+    background: var(--bg);
+    border-left: 1px solid var(--rule);
+    transform: translateX(110%);
+    transition: transform 0.55s var(--ease);
+    z-index: 12;
+    overflow-y: auto;
+    box-shadow: -20px 0 60px rgba(22, 33, 25, 0.06);
+  }
+  .brief.is-open { transform: translateX(0); }
+  .brief-head {
+    padding: 28px 32px 22px;
+    border-bottom: 1px solid var(--rule-soft);
+    display: grid;
+    gap: 6px;
+  }
+  .brief-head .eb {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+  }
+  .brief-head h2 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: 30px;
+    line-height: 1.05;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+  .brief-head .suite-line {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  .brief-close {
+    position: absolute; top: 24px; right: 24px;
+    padding: 6px 10px;
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    background: none;
+  }
+  .brief-close:hover { color: var(--ink); border-color: var(--ink); }
+  .brief-section {
+    padding: 22px 32px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .brief-section h3 {
+    font-family: var(--sans);
+    font-size: 10px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 400;
+    margin-bottom: 12px;
+  }
+  .brief-section .lede {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink);
+    text-wrap: pretty;
+  }
+  .brief-section .lede em { font-style: italic; color: var(--ink-soft); }
+  .brief-section .body-line {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+  .brief-thread {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .brief-thread:first-of-type { border-top: none; }
+  .brief-thread .bt-chip {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: radial-gradient(circle at 38% 32%, var(--orb-1), var(--orb-2) 50%, var(--orb-3) 90%, var(--orb-4));
+    display: grid; place-items: center;
+    font-family: var(--serif); font-style: italic; font-size: 11px; color: var(--orb-1);
+  }
+  .brief-thread .bt-title { font-family: var(--serif); font-size: 15px; color: var(--ink); }
+  .brief-thread .bt-meta { font-family: var(--sans); font-size: 9.5px; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+  .brief-thread .bt-state { width: 8px; height: 8px; border-radius: 50%; }
+  .brief-thread .bt-state.motion { background: var(--motion); box-shadow: 0 0 6px var(--motion); }
+  .brief-thread .bt-state.awaits { background: var(--awaits); }
+  .brief-thread .bt-state.settled { background: var(--settled); }
+  .brief-thread .bt-state.private { background: transparent; border: 1px solid var(--ink); width: 9px; height: 9px; }
+
+  .brief-confirmed .bc-row {
+    display: grid;
+    grid-template-columns: 16px 1fr;
+    gap: 12px;
+    align-items: start;
+    padding: 8px 0;
+    border-top: 1px solid var(--rule-soft);
+  }
+  .brief-confirmed .bc-row:first-of-type { border-top: none; padding-top: 2px; }
+  .brief-confirmed .bc-glyph {
+    color: var(--success);
+    font-size: 13px;
+    line-height: 1.5;
+    font-family: var(--sans);
+  }
+  .brief-confirmed .bc-text {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--ink-soft);
+    line-height: 1.45;
+  }
+  .brief-confirmed .bc-meta {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .brief-confidence {
+    background: var(--bg-card);
+    padding: 16px 18px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px;
+  }
+  .brief-confidence svg { width: 14px; height: 14px; stroke: var(--ink); fill: none; stroke-width: 1.5; margin-top: 4px; }
+  .brief-confidence .pc-eb {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 4px;
+  }
+  .brief-confidence .pc-body {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  /* ────────────── FIREHOSE ────────────── */
+  .op-firehose {
+    border-left: 1px solid var(--rule-soft);
+    background: var(--bg);
+    overflow-y: auto;
+    padding: 26px 28px 32px;
+  }
+  .op-firehose h2 {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    font-weight: 400;
+    margin-bottom: 14px;
+  }
+  .op-firehose .empty {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14.5px;
+    padding: 20px 0;
+  }
+
+  .fh-card {
+    border-top: 1px solid var(--rule);
+    padding: 16px 0 20px;
+    transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+    max-height: 600px;
+    overflow: hidden;
+  }
+  .fh-card:last-child { border-bottom: 1px solid var(--rule); }
+  .fh-card.is-new { animation: fh-in 0.7s var(--ease); }
+  .fh-card.is-removing {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  @keyframes fh-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .fh-card .fh-eb {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .fh-card .fh-eb strong { color: var(--gold-deep); font-weight: 400; }
+  .fh-card .fh-title {
+    font-family: var(--serif);
+    font-size: 17px;
+    color: var(--ink);
+    line-height: 1.35;
+    margin-bottom: 4px;
+  }
+  .fh-card .fh-context {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13.5px;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .fh-action {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 0;
+    transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease, transform 0.5s ease;
+    max-height: 120px;
+    overflow: hidden;
+  }
+  .fh-action.is-removing {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    transform: translateX(8px);
+  }
+  .fh-action .fh-action-text {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
+  .fh-action .fh-handler {
+    font-family: var(--sans);
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .fh-action .fh-handle {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--ink);
+    padding: 7px 12px;
+    border: 1px solid var(--rule);
+    cursor: pointer;
+    background: var(--bg);
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+  .fh-action .fh-handle:hover { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .fh-action.is-done .fh-handle {
+    background: var(--success);
+    color: var(--bg);
+    border-color: var(--success);
+  }
+  .fh-action .fh-handle::after { content: ' →'; margin-left: 4px; }
+  .fh-action.is-done .fh-handle::after { content: ' ✓'; }
+
+  /* Approved by guest — action has been actively endorsed but staff still
+     has to confirm. The row is highlighted so the operator's eye lands on it. */
+  .fh-action.is-approved {
+    background: rgba(180, 140, 70, 0.06);
+    border-left: 2px solid var(--ink);
+    padding-left: 10px;
+  }
+  .fh-action.is-approved .fh-handle.is-approved-by-guest {
+    border-color: var(--ink);
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .fh-approved-badge {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* confidence tally at the bottom */
+  .fh-confidence {
+    margin-top: 30px;
+    padding: 18px 18px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+  .fh-confidence svg { width: 14px; height: 14px; stroke: var(--ink); fill: none; stroke-width: 1.5; margin-top: 4px; }
+  .fh-confidence .eb {
+    font-family: var(--sans);
+    font-size: 9.5px;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 6px;
+  }
+  .fh-confidence .body {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  /* toast for staff acks */
+  .toast {
+    position: fixed;
+    bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: var(--bg);
+    padding: 14px 22px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    z-index: 200;
+    border: 1px solid var(--gold-soft);
+    opacity: 0;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+  }
+  .toast.is-shown {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+  <header class="op-bar">
+    <div class="left">
+      THE ATELIER <em>· floor</em> at <span id="op-property-name">Rosewood Sand Hill</span>
+    </div>
+    <div class="center">
+      <div class="eb"><span id="op-status">Tonight on the floor</span></div>
+      <div class="when" id="op-when">Thursday evening &middot; the property at rest</div>
+    </div>
+    <div class="right">
+      <div class="stat"><strong id="stat-guests">8</strong><span class="sub">In residence</span></div>
+      <div class="stat"><strong id="stat-plans">5</strong><span class="sub">Plans in motion</span></div>
+      <div class="stat"><strong id="stat-await">3</strong><span class="sub">Wanting an action</span></div>
+      <div class="stat"><strong id="stat-conf">3</strong><span class="sub">In confidence</span></div>
+    </div>
+  </header>
+
+  <div class="op-canvas">
+    <section class="op-aerial">
+      <div class="aerial-title">
+        <div class="eb" id="op-aerial-eb">The property</div>
+        <h1 id="op-aerial-title">Sixteen acres along<br/><em>Sand Hill Road</em></h1>
+        <div id="op-aerial-note" style="display:none; margin-top:14px; font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--muted); max-width: 320px; line-height: 1.5;"></div>
+      </div>
+
+      <svg class="aerial-svg" id="aerial-svg" viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid meet">
+        <!-- a stylised property plan: the residence, Madera, Asaya, the pool, the Spruce Cottage, paths -->
+
+        <!-- paths -->
+        <path class="path" d="M 100 800 Q 400 720 600 700 T 1100 660" />
+        <path class="path" d="M 600 700 L 600 880" />
+        <path class="path" d="M 220 380 L 220 220" />
+
+        <!-- Spruce Cottage (top-left) -->
+        <g class="suite" data-suite="g_whitfield">
+          <rect class="s-fill" x="80" y="80" width="220" height="120" rx="2" />
+          <circle class="suite-pulse" cx="190" cy="140" r="14" />
+          <text x="190" y="105" text-anchor="middle">THE SPRUCE COTTAGE</text>
+          <text class="label-serif" x="190" y="160" text-anchor="middle">Robert Whitfield</text>
+          <text x="190" y="180" text-anchor="middle">RETURNING &middot; 4th STAY</text>
+        </g>
+
+        <!-- Main residence — six suites in a block -->
+        <g>
+          <rect class="building" x="380" y="160" width="640" height="320" rx="2" />
+          <text x="700" y="190" text-anchor="middle">THE MAIN RESIDENCE</text>
+
+          <!-- Suite grid: 3 cols x 2 rows -->
+          <g class="suite is-active" data-suite="g_daniel_park">
+            <rect class="s-fill" x="400" y="210" width="190" height="115" rx="1" />
+            <circle class="suite-pulse" cx="495" cy="268" r="12" />
+            <text x="495" y="232" text-anchor="middle">MADERA RESIDENCE</text>
+            <text class="label-serif" x="495" y="280" text-anchor="middle">Daniel Park</text>
+            <text x="495" y="302" text-anchor="middle">IN SESSION</text>
+          </g>
+          <g class="suite" data-suite="g_trents">
+            <rect class="s-fill" x="610" y="210" width="190" height="115" rx="1" />
+            <circle class="suite-pulse" cx="705" cy="268" r="12" />
+            <text x="705" y="232" text-anchor="middle">SUITE 612</text>
+            <text class="label-serif" x="705" y="280" text-anchor="middle">M. &amp; L. Trent</text>
+            <text x="705" y="302" text-anchor="middle">VOW RENEWAL SAT</text>
+          </g>
+          <g class="suite" data-suite="g_devaraj">
+            <rect class="s-fill" x="820" y="210" width="180" height="115" rx="1" />
+            <circle class="suite-pulse" cx="910" cy="268" r="12" />
+            <text x="910" y="232" text-anchor="middle">SUITE 614</text>
+            <text class="label-serif" x="910" y="280" text-anchor="middle">A. Devaraj</text>
+            <text x="910" y="302" text-anchor="middle">BOARD TOMORROW</text>
+          </g>
+          <g class="suite" data-suite="g_mitchell">
+            <rect class="s-fill" x="400" y="345" width="190" height="115" rx="1" />
+            <text x="495" y="367" text-anchor="middle">SUITE 412</text>
+            <text class="label-serif" x="495" y="415" text-anchor="middle">The Mitchells</text>
+            <text x="495" y="437" text-anchor="middle">FAMILY &middot; 4 of 4</text>
+          </g>
+          <g class="suite" data-suite="g_voss">
+            <rect class="s-fill" x="610" y="345" width="190" height="115" rx="1" />
+            <text x="705" y="367" text-anchor="middle">SUITE 408</text>
+            <text class="label-serif" x="705" y="415" text-anchor="middle">Sara Voss</text>
+            <text x="705" y="437" text-anchor="middle">RECOVERY WEEK</text>
+          </g>
+          <g class="suite" data-suite="g_bouchard" data-private="true">
+            <rect class="s-fill" x="820" y="345" width="180" height="115" rx="1" />
+            <text x="910" y="367" text-anchor="middle">SUITE 618</text>
+            <text class="label-serif" x="910" y="415" text-anchor="middle">Henri Bouchard</text>
+            <text x="910" y="437" text-anchor="middle">HELD IN CONFIDENCE</text>
+          </g>
+        </g>
+
+        <!-- Asaya wellness -->
+        <g>
+          <rect class="building" x="1060" y="220" width="80" height="260" rx="2" />
+          <text x="1100" y="365" transform="rotate(90 1100 365)" text-anchor="middle">ASAYA &middot; WELLNESS</text>
+        </g>
+
+        <!-- Courtyard / pool -->
+        <rect class="courtyard" x="380" y="520" width="640" height="80" rx="3" />
+        <text x="700" y="565" text-anchor="middle">THE POOL &middot; GARDEN</text>
+
+        <!-- Madera (restaurant) -->
+        <g>
+          <rect class="building" x="320" y="640" width="760" height="170" rx="2" />
+          <text x="700" y="666" text-anchor="middle">MADERA &middot; PRIVATE ROOM &middot; KITCHEN</text>
+
+          <!-- Madera private room within Madera -->
+          <g class="suite" data-suite="madera_private">
+            <rect class="s-fill" x="700" y="680" width="180" height="110" rx="1" />
+            <circle class="suite-pulse" cx="790" cy="735" r="14" />
+            <text x="790" y="705" text-anchor="middle">THE PRIVATE ROOM</text>
+            <text class="label-serif" x="790" y="752" text-anchor="middle">Thursday 7:00 pm</text>
+            <text x="790" y="772" text-anchor="middle">DANIEL PARK &middot; 4 COVERS</text>
+          </g>
+        </g>
+
+        <!-- Mei Tanaka — arriving — outside the property at top-right -->
+        <g class="suite" data-suite="g_tanaka">
+          <rect class="s-fill" x="980" y="80" width="160" height="100" rx="2" stroke-dasharray="6 5" />
+          <text x="1060" y="105" text-anchor="middle">SUITE 322</text>
+          <text class="label-serif" x="1060" y="135" text-anchor="middle">Mei Tanaka</text>
+          <text x="1060" y="155" text-anchor="middle">ARRIVING 6:30 pm</text>
+          <text class="label-serif" x="1060" y="170" text-anchor="middle" font-size="11" fill="var(--muted)">car en route from SFO</text>
+        </g>
+
+        <!-- compass and scale (vestigial decoration) -->
+        <g transform="translate(50, 850)" stroke="var(--muted-low)" stroke-width="0.7" fill="var(--muted)" font-family="Inter" font-size="9" letter-spacing="2">
+          <text x="0" y="0">N ↑</text>
+        </g>
+      </svg>
+
+      <div class="aerial-legend">
+        <span class="lg-item"><span class="lg-dot" style="background: var(--gold)"></span>In motion</span>
+        <span class="lg-item"><span class="lg-dot" style="background: var(--review)"></span>Wanting an action</span>
+        <span class="lg-item"><span class="lg-dot" style="background: var(--success)"></span>Settled</span>
+        <span class="lg-item"><span class="lg-dot" style="background: transparent; border: 1px solid var(--ink);"></span>Held in confidence</span>
+      </div>
+
+      <!-- the brief panel -->
+      <aside class="brief" id="brief">
+        <button class="brief-close" id="brief-close">Close</button>
+        <div id="brief-content"></div>
+      </aside>
+    </section>
+
+    <aside class="op-firehose">
+      <h2>The firehose &middot; plans wanting an action</h2>
+      <div id="firehose-list"></div>
+      <div class="fh-confidence">
+        <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        <div>
+          <div class="eb">Held in confidence</div>
+          <div class="body" id="conf-line">Three conversations and one plan on the floor tonight are between guests and the studio. You will not see their content here.</div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- Local key seed (gitignored). Loads keys onto window.__local_keys -->
+  <script src=".local-keys.js" onerror="void(0)"></script>
+
+  <script src="atelier-data.js"></script>
+  <script src="operator-app.js"></script>
+</body>
+</html>
