@@ -1,6 +1,6 @@
 # The Atelier
 **A private studio in every Rosewood suite.**
-*Hospitality 2030 hackathon · Rosewood Sand Hill · v2*
+*Hospitality 2030 hackathon · Rosewood Sand Hill*
 
 > *"Come for the suite. Stay for the thinking."*
 
@@ -16,22 +16,6 @@ Rosewood already runs the world's finest human personalization machine — butle
 - **To the staff** — an architectural aerial of the property where every guest's suite is color-coded by state, every plan in motion lives in a firehose, and every team member is briefed like the property's best concierge.
 
 This repo is the **working prototype**: two browser windows, no backend, real Claude inference, real ElevenLabs voice, real-time staff↔guest seam over `BroadcastChannel`.
-
-— · —
-
-## The five-minute demo (what you actually see)
-
-| t | Guest window | Operator window |
-|---|---|---|
-| **0:00** | Click **Enter the studio**. Cover dissolves. Orb assembles. The Atelier's host voice welcomes. | Sand Hill aerial visible. Madera Residence idle. |
-| **0:20** | **Cmd+Space** — say: *"I'm closing a Series B Friday and hosting the lead's partner here Thursday. Help me think through both."* | The Madera Residence (Daniel Park) pulses gold. |
-| **1:10** | The Strategist streams a reply in their own voice. Then The Convener takes the thread and engraves a **plan card** — seating, timing, gift, three tappable next-step actions. | Plan slides into the firehose; private-room hotspot pulses. |
-| **1:40** | Say *"Atelier, make this private."* Lock closes. Banner appears. | Suite turns dashed-stroke. Plan removes from firehose. "In confidence" tally ticks up. |
-| **2:05** | Toggle public again — the staff loop reopens. | Madera returns to gold. |
-| **2:10** | (Switch to operator.) Tap *"I will handle it →"* on **Book the Madera private room**. The Atelier host voice cuts in: *"The Convener has word — Henri has the private room arranged. Shall I bring you over?"* Say *"yes."* | Suite flashes. Action handled. Specialist acknowledges back to the guest. |
-| **2:55** | Switch the property pill → **Hong Kong**. Palette transforms harbour-blue. New welcome line plays. | (Unchanged — operator is anchored to Sand Hill.) |
-| **3:25** | **Cmd+3** → **The Constellation.** Threads radiate as satellites under a warm night sky. | — |
-| **4:20** | **Cmd+1**: *"This is the Atelier at Rosewood. Come for the suite. Stay for the thinking."* | — |
 
 — · —
 
@@ -76,22 +60,42 @@ What the studio actually does, distinct from "an LLM in a hotel app":
 3. **Plans are first-class objects.** A `PLAN` is not chat text — it's `{ kind, title, when, where, attendees, detail, status, activity }`. It surfaces inline, on the Thinking dashboard, and on the staff firehose. Updates propagate to all three.
 4. **One-tap staff actions.** Every plan carries 1–3 suggested staff next-steps (*"Book the car · 20:00 from entrance · The Concierge"*). Staff tap; the originating specialist acknowledges back to the guest in their own voice.
 5. **Privacy is operational, not performative.** *"Atelier, make this private"* changes what the staff console can see *and* what the specialist is willing to do. The staff are told *what they cannot see* — without seeing it.
-6. **Cross-property memory.** Switching the property pill to Hong Kong is not a re-login. The Atelier opens with: *"It is good to see you again — your last stay was at Sand Hill in March."*
+6. **Cross-property memory.** Switching the property pill to Kona Village is not a re-login. The Atelier opens with: *"It is good to see you again — your last stay was at Sand Hill in March."*
 7. **Cross-thread interrupt.** If you're in conversation with The Strategist and the operator handles a Convener action, the Atelier host voice offers: *"The Convener has word — Henri has the Madera private room arranged. Shall I bring you over?"* You say *"yes"* or *"later."*
 
 — · —
 
-## The specialists (Sand Hill roster)
+## The specialists
 
-This demo features 12 specialists across 3 properties (Sand Hill · Crillon · Hong Kong). Sand Hill's roster:
+This demo features 12 specialists across 3 properties. Three are **universal** — they appear at every property: The Concierge, The Sommelier, The Historian. The rest are **shaped by place** — each property's roster reflects what its guests come there for. Crillon does not staff a Strategist; Sand Hill does not staff a Mariner.
 
-- **The Strategist** — deals · structure · negotiation
-- **The Convener** — business hosting · gatherings
-- **The Physician** — wellness · recovery · longevity
-- **The Steward** — private counsel (threads default to private)
-- **The Concierge** — logistics · reservations
-- **The Sommelier** — drinks · pairings · the table
-- **The Historian** — place · heritage · meaning
+### Sand Hill — performance studio
+
+*Deal-making, hard moments, recovery.*
+
+- **The Strategist** — deals · structure · negotiation *(unique to Sand Hill)*
+- **The Convener** — business hosting · gatherings *(unique to Sand Hill)*
+- **The Physician** — wellness · recovery · longevity *(unique to Sand Hill)*
+- **The Steward** — private counsel, threads default to private *(unique to Sand Hill)*
+- The Concierge · The Sommelier · The Historian
+
+### Crillon — palace studio
+
+*Paris art world, ceremony, the city as the room.*
+
+- **The Aesthete** — fine art · auctions · galleries *(unique to Crillon)*
+- **The Curator** — experiences · plans · routes *(unique to Crillon)*
+- **The Celebrant** — weddings · proposals · milestones *(shared with Kona)*
+- The Concierge · The Sommelier · The Historian
+
+### Kona Village — ocean studio
+
+*Water, land, ceremony with cultural depth.*
+
+- **The Mariner** — ocean · sailing · the water *(unique to Kona)*
+- **The Naturalist** — land · creatures · the wild *(unique to Kona)*
+- **The Celebrant** — ceremonies · milestones with Hawaiian tradition *(shared with Crillon)*
+- The Concierge · The Sommelier · The Historian
 
 — · —
 
@@ -157,7 +161,7 @@ In the operator window: **tap any suite** to open the brief. **Esc** closes.
 
 - **Not a chatbot.** The specialists default to action over advice — candidates, a recommendation, a committed plan, suggested staff next-steps.
 - **Not a final product.** This is the operational logic and aesthetic language of what the Atelier becomes when deployed across a Rosewood property. The prose register, the discretion of the orb, the way decisions arrive as a tray, the way the studio reshapes itself property to property — these are what a Rosewood guest will recognize at every property they visit thereafter.
-- **Not generalized.** Every line is written for Rosewood. Crillon ≠ Sand Hill ≠ Hong Kong. The Steward at the Carlyle does not sound like the Strategist at Sand Hill. The studio is reshaped property to property, not deployed identically.
+- **Not generalized.** Every line is written for Rosewood. Crillon ≠ Sand Hill ≠ Kona Village. The Steward at the Carlyle does not sound like the Strategist at Sand Hill. The studio is reshaped property to property, not deployed identically.
 
 — · —
 
