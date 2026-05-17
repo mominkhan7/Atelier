@@ -2,7 +2,7 @@
 **A private studio in every Rosewood suite.**
 *Hospitality 2030 hackathon · Rosewood Sand Hill*
 
-> *"Come for the suite. Stay for the thinking."*
+> A personalized in-suite studio where guests converse naturally about whatever is on their mind, with specialist agents that help execute tasks on the spot and an operator dashboard that lets staff see every moment land as a claimable plan and respond in real time.
 
 — · —
 
@@ -163,6 +163,3 @@ In the operator window: **tap any suite** to open the brief. **Esc** closes.
 - **Not a final product.** This is the operational logic and aesthetic language of what the Atelier becomes when deployed across a Rosewood property. The prose register, the discretion of the orb, the way decisions arrive as a tray, the way the studio reshapes itself property to property — these are what a Rosewood guest will recognize at every property they visit thereafter.
 - **Not generalized.** Every line is written for Rosewood. Crillon ≠ Sand Hill ≠ Kona Village. The Steward at the Carlyle does not sound like the Strategist at Sand Hill. The studio is reshaped property to property, not deployed identically.
 
-— · —
-
-*"Come for the suite. Stay for the thinking."*
