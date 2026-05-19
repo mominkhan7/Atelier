@@ -30,6 +30,7 @@
     seededFirehose: true,
     actionsCompleted: new Set(),
     currentBriefGuestId: null,
+    briefClosedByPrivacy: null, // guestId whose brief we auto-closed on going private; reopen on un-private
   };
 
   // Map a guest display name to the canonical MOCK_GUESTS id so seed plans
@@ -482,10 +483,19 @@
         state.activePlans
           .filter(p => !p.hiddenByPrivacy)
           .forEach(p => list.appendChild(renderFhCard(p)));
-        // Update tally on the guest record
+        // Mirror the privacy flag onto the matching thread record so the brief
+        // shows the lock placeholder while private and the real title once public.
+        // Only adjust the tally if the thread's state actually changed, so repeat
+        // toggles can't drift the count.
         const guestRec = (window.MOCK_GUESTS || []).find(g => g.id === guestId);
-        if (guestRec) {
-          guestRec.privateThreadCount = Math.max(0, (guestRec.privateThreadCount || 0) + (m.private ? 1 : -1));
+        if (guestRec && Array.isArray(guestRec.threads)) {
+          const thread = guestRec.threads.find(t =>
+            t.specialist === m.specialist && (!m.title || t.title === m.title));
+          if (thread && thread.private !== !!m.private) {
+            thread.private = !!m.private;
+            guestRec.privateThreadCount = Math.max(0,
+              (guestRec.privateThreadCount || 0) + (m.private ? 1 : -1));
+          }
         }
         // If Madera plan is now hidden, dim the private-room hotspot
         const madera = document.querySelector('[data-suite="madera_private"]');
@@ -493,19 +503,44 @@
           const anyPublicPlan = state.activePlans.some(p => !p.hiddenByPrivacy);
           madera.setAttribute('data-state', anyPublicPlan ? 'awaits' : 'settled');
         }
-        // If brief panel is open for this guest, close it so we don't leak context
+        // Brief visibility: on going private, close the brief if it was open for
+        // this guest (don't leak context) and remember we closed it. On going
+        // back to public, reopen so the thread returns to visibility on its own.
+        const brief = $('#brief');
+        const briefOpen = brief && brief.classList.contains('is-open');
         if (m.private) {
-          const brief = $('#brief');
-          if (brief && brief.classList.contains('is-open')) brief.classList.remove('is-open');
+          if (briefOpen && state.currentBriefGuestId === guestId) {
+            brief.classList.remove('is-open');
+            state.briefClosedByPrivacy = guestId;
+          }
+        } else {
+          if (state.briefClosedByPrivacy === guestId) {
+            state.briefClosedByPrivacy = null;
+            openBrief(guestId);
+          } else if (briefOpen && state.currentBriefGuestId === guestId) {
+            openBrief(guestId); // re-render so thread title replaces the lock placeholder
+          }
         }
         updateStats();
       } else if (m.type === 'thread_opened') {
         const guestId = m.guestId || 'g_daniel_park';
         const guestSuite = document.querySelector('[data-suite="' + guestId + '"]');
         if (guestSuite && !m.private) guestSuite.setAttribute('data-state', 'motion');
+        // Mirror the new thread into the operator's guest record so the brief
+        // panel picks it up. Without this, threads opened live in guest mode
+        // never appear in operator — the brief reads from MOCK_GUESTS.
+        const guestRec = (window.MOCK_GUESTS || []).find(g => g.id === guestId);
+        if (guestRec) {
+          if (!Array.isArray(guestRec.threads)) guestRec.threads = [];
+          const dup = guestRec.threads.some(t => t.specialist === m.specialist && t.title === m.title);
+          if (!dup) {
+            guestRec.threads.unshift({ title: m.title, specialist: m.specialist, state: 'motion', private: !!m.private });
+            refreshOpenBrief();
+          }
+        }
         // Update the status line: "Daniel Park · with The Strategist"
         const sp = (window.SPECIALISTS && window.SPECIALISTS[m.specialist]) || null;
-        const guestName = ((window.MOCK_GUESTS || []).find(g => g.id === guestId) || {}).name || 'A guest';
+        const guestName = (guestRec && guestRec.name) || 'A guest';
         const status = document.getElementById('op-status');
         if (status) {
           if (sp) status.textContent = guestName + ' · with ' + sp.name + (m.private ? ' · held in confidence' : '');
